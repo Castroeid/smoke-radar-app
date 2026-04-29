@@ -1,4 +1,5 @@
-import { StyleSheet, Text, View, Pressable } from 'react-native';
+import { router } from 'expo-router';
+import { Pressable, StyleSheet, Text, View } from 'react-native';
 
 const TRENDING_ITEMS = [
   {
@@ -42,8 +43,8 @@ export default function RadarScreen() {
         ))}
       </View>
 
-      <Pressable style={styles.ctaButton}>
-        <Text style={styles.ctaText}>Choose My Direction</Text>
+      <Pressable style={styles.backButton} onPress={() => router.back()}>
+        <Text style={styles.backText}>Back</Text>
       </Pressable>
     </View>
   );
@@ -106,16 +107,18 @@ const styles = StyleSheet.create({
     fontSize: 13,
     fontWeight: '600',
   },
-  ctaButton: {
+  backButton: {
     marginTop: 'auto',
-    backgroundColor: '#FF6A00',
+    backgroundColor: '#1B1B1B',
     borderRadius: 999,
     minHeight: 54,
     justifyContent: 'center',
     alignItems: 'center',
+    borderWidth: 1,
+    borderColor: '#2A2A2A',
   },
-  ctaText: {
-    color: '#111111',
+  backText: {
+    color: '#F2F2F2',
     fontSize: 16,
     fontWeight: '700',
     letterSpacing: 0.3,
