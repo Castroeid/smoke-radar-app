@@ -17,6 +17,16 @@ export default function RootLayout() {
       <Stack>
         <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
         <Stack.Screen
+          name="selection"
+          options={{
+            title: 'Selection',
+            headerStyle: { backgroundColor: '#090909' },
+            headerTintColor: '#F7F7F7',
+            headerShadowVisible: false,
+            contentStyle: { backgroundColor: '#090909' },
+          }}
+        />
+        <Stack.Screen
           name="radar"
           options={{
             title: 'Radar',

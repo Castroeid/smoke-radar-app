@@ -32,14 +32,17 @@ export default function RadarScreen() {
 
       <View style={styles.cardsWrapper}>
         {TRENDING_ITEMS.map((item) => (
-          <View key={item.title} style={styles.card}>
+          <Pressable
+            key={item.title}
+            style={styles.card}
+            onPress={() => router.push({ pathname: '/selection', params: { meat: item.title } })}>
             <View style={styles.cardTopRow}>
               <Text style={styles.cardTitle}>{item.title}</Text>
               <Text style={styles.arrow}>↗</Text>
             </View>
             <Text style={styles.description}>{item.description}</Text>
             <Text style={styles.momentum}>Momentum {item.momentum}</Text>
-          </View>
+          </Pressable>
         ))}
       </View>
 
