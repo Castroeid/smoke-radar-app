@@ -1,3 +1,4 @@
+import { router } from 'expo-router';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 
 export default function HomeScreen() {
@@ -6,7 +7,7 @@ export default function HomeScreen() {
       <View style={styles.content}>
         <Text style={styles.title}>SMOKE RADAR</Text>
         <Text style={styles.subtitle}>What’s hot right now in meat</Text>
-        <Pressable style={styles.button} onPress={() => {}}>
+        <Pressable style={styles.button} onPress={() => router.push('/radar')}>
           <Text style={styles.buttonText}>Start Radar</Text>
         </Pressable>
       </View>
