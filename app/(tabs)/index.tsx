@@ -5,10 +5,11 @@ export default function HomeScreen() {
   return (
     <View style={styles.container}>
       <View style={styles.content}>
-        <Text style={styles.title}>SMOKE RADAR</Text>
-        <Text style={styles.subtitle}>What’s hot right now in meat</Text>
+        <Text style={styles.badge}>Smoke Radar</Text>
+        <Text style={styles.title}>ברוכים הבאים לרדאר העשן</Text>
+        <Text style={styles.subtitle}>מגלים מה חם עכשיו ומתקדמים למסלול שמתאים בדיוק לארוחה שלך.</Text>
         <Pressable style={styles.button} onPress={() => router.push('/radar')}>
-          <Text style={styles.buttonText}>Start Radar</Text>
+          <Text style={styles.buttonText}>התחל רדאר</Text>
         </Pressable>
       </View>
     </View>
@@ -16,42 +17,11 @@ export default function HomeScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#0B0B0B',
-  },
-  content: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    paddingHorizontal: 24,
-    gap: 14,
-  },
-  title: {
-    color: '#F5F5F5',
-    fontSize: 40,
-    fontWeight: '800',
-    letterSpacing: 2,
-    textAlign: 'center',
-  },
-  subtitle: {
-    color: '#A8A8A8',
-    fontSize: 16,
-    textAlign: 'center',
-    marginBottom: 22,
-  },
-  button: {
-    backgroundColor: '#FF6A00',
-    paddingVertical: 14,
-    paddingHorizontal: 30,
-    borderRadius: 999,
-    minWidth: 190,
-    alignItems: 'center',
-  },
-  buttonText: {
-    color: '#111111',
-    fontSize: 16,
-    fontWeight: '700',
-    letterSpacing: 0.4,
-  },
+  container: { flex: 1, backgroundColor: '#090909' },
+  content: { flex: 1, justifyContent: 'center', paddingHorizontal: 24, gap: 16 },
+  badge: { color: '#FF9B4A', fontSize: 14, textAlign: 'right' },
+  title: { color: '#F5F5F5', fontSize: 34, fontWeight: '800', textAlign: 'right', lineHeight: 42 },
+  subtitle: { color: '#B4B4B4', fontSize: 16, textAlign: 'right', lineHeight: 24 },
+  button: { backgroundColor: '#FF6A00', paddingVertical: 16, borderRadius: 14, alignItems: 'center', marginTop: 6 },
+  buttonText: { color: '#111', fontSize: 18, fontWeight: '800' },
 });
