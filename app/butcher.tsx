@@ -1,27 +1,82 @@
 import { useEffect, useState } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
-import { findNearbyButchers } from '@/services/smokeRadarService';
+
+import { AppButton } from '@/components/AppButton';
+import { AppCard } from '@/components/AppCard';
+import { AppScreen } from '@/components/AppScreen';
+import { SectionTitle } from '@/components/SectionTitle';
+import { rtlText, smokeColors } from '@/constants/smokeTheme';
+import { findNearbyButchers, type Butcher } from '@/services/smokeRadarService';
 
 export default function ButcherScreen() {
-  const [items, setItems] = useState<{ name: string; distance: string }[]>([]);
-  useEffect(() => { findNearbyButchers().then(setItems); }, []);
+  const [items, setItems] = useState<Butcher[]>([]);
+
+  useEffect(() => {
+    findNearbyButchers().then(setItems);
+  }, []);
 
   return (
-    <View style={styles.container}>
-      <Text style={styles.title}>קצביות קרובות אליך</Text>
-      {items.map((b) => (
-        <View style={styles.row} key={b.name}>
-          <Text style={styles.distance}>{b.distance}</Text>
-          <Text style={styles.name}>{b.name}</Text>
-        </View>
-      ))}
-    </View>
+    <AppScreen>
+      <SectionTitle
+        eyebrow="מציאת קצביות"
+        title="קצביות קרובות אליכם"
+        subtitle="תוצאות mock למסך נפרד וברור. כפתור המפה הוא placeholder עד חיבור שירות מיקום."
+      />
+
+      <View style={styles.list}>
+        {items.map((item) => (
+          <AppCard key={item.id}>
+            <View style={styles.topRow}>
+              <Text style={styles.rating}>★ {item.rating}</Text>
+              <Text style={styles.name}>{item.name}</Text>
+            </View>
+            <Text style={styles.address}>{item.address}</Text>
+            <Text style={styles.review}>{item.reviewHighlight}</Text>
+            <AppButton title="פתחו מפה" variant="secondary" onPress={() => {}} />
+          </AppCard>
+        ))}
+      </View>
+    </AppScreen>
   );
 }
+
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#090909', padding: 20, gap: 12 },
-  title: { color: '#F7F7F7', fontSize: 28, fontWeight: '800', textAlign: 'right' },
-  row: { flexDirection: 'row', justifyContent: 'space-between', backgroundColor: '#171717', borderRadius: 12, padding: 14 },
-  name: { color: '#fff', fontSize: 17 },
-  distance: { color: '#FF9B4A', fontSize: 15 },
+  list: {
+    gap: 12,
+  },
+  topRow: {
+    flexDirection: 'row-reverse',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    gap: 12,
+  },
+  name: {
+    flex: 1,
+    color: smokeColors.text,
+    fontSize: 23,
+    fontWeight: '900',
+    ...rtlText,
+  },
+  rating: {
+    overflow: 'hidden',
+    borderRadius: 999,
+    backgroundColor: '#2B140E',
+    color: smokeColors.gold,
+    fontSize: 13,
+    fontWeight: '900',
+    paddingHorizontal: 10,
+    paddingVertical: 7,
+  },
+  address: {
+    color: smokeColors.orange,
+    fontSize: 15,
+    fontWeight: '900',
+    ...rtlText,
+  },
+  review: {
+    color: smokeColors.muted,
+    fontSize: 15,
+    lineHeight: 23,
+    ...rtlText,
+  },
 });

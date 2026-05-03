@@ -1,36 +1,188 @@
 import { router, useLocalSearchParams } from 'expo-router';
-import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Share, StyleSheet, Text, View } from 'react-native';
+
+import { AppButton } from '@/components/AppButton';
+import { AppCard } from '@/components/AppCard';
+import { AppScreen } from '@/components/AppScreen';
+import { SectionTitle } from '@/components/SectionTitle';
+import { rtlText, smokeColors } from '@/constants/smokeTheme';
+import type { ExpertAnswer, RecipeResult } from '@/services/smokeRadarService';
 
 export default function ResultScreen() {
-  const { source, payload } = useLocalSearchParams<{ source?: string; payload?: string }>();
-  const isRecipe = source === 'recipe';
-  const recipe = isRecipe && payload ? JSON.parse(payload) : null;
+  const { source, payload, meat } = useLocalSearchParams<{ source?: string; payload?: string; meat?: string }>();
+  const selectedCut = typeof meat === 'string' && meat.length > 0 ? meat : 'המנה';
+  const title = source === 'recipe' ? 'המתכון שלכם מוכן' : 'תשובה מהמומחה';
+
+  const shareResult = async () => {
+    await Share.share({ message: `Smoke Radar: ${title}` });
+  };
+
+  const tryAgain = () => {
+    if (source === 'expert') {
+      router.push({ pathname: '/expert', params: { meat: selectedCut } });
+      return;
+    }
+
+    router.push({ pathname: '/recipe', params: { meat: selectedCut } });
+  };
 
   return (
-    <ScrollView style={styles.container} contentContainerStyle={styles.content}>
-      <Text style={styles.title}>{isRecipe ? 'המתכון שלך מוכן' : 'תשובת המומחה'}</Text>
-      {isRecipe && recipe ? (
-        <View style={styles.card}>
-          <Text style={styles.heading}>{recipe.title}</Text>
-          <Text style={styles.summary}>{recipe.summary}</Text>
-          {recipe.steps.map((s: string, i: number) => <Text key={s} style={styles.step}>{i + 1}. {s}</Text>)}
+    <AppScreen>
+      <SectionTitle title={title} subtitle="אפשר להמשיך, לשתף או לחזור לרדאר." />
+
+      {source === 'recipe' && payload ? <RecipeView recipe={JSON.parse(payload) as RecipeResult} /> : null}
+      {source === 'expert' && payload ? <ExpertView answer={JSON.parse(payload) as ExpertAnswer} /> : null}
+
+      <AppCard>
+        <Text style={styles.nextTitle}>פעולות המשך</Text>
+        <View style={styles.actionGrid}>
+          <AppButton title="נסו שוב" variant="secondary" onPress={tryAgain} style={styles.actionButton} />
+          <AppButton title="חזרו לרדאר" onPress={() => router.push('/radar')} style={styles.actionButton} />
         </View>
-      ) : (
-        <View style={styles.card}><Text style={styles.step}>{payload}</Text></View>
-      )}
-      <Pressable style={styles.button} onPress={() => router.push('/radar')}><Text style={styles.buttonText}>חזרה לרדאר</Text></Pressable>
-    </ScrollView>
+        <AppButton title="שתפו" variant="ghost" onPress={shareResult} />
+      </AppCard>
+    </AppScreen>
+  );
+}
+
+function RecipeView({ recipe }: { recipe: RecipeResult }) {
+  return (
+    <AppCard elevated>
+      <Text style={styles.recipeTitle}>{recipe.title}</Text>
+      <View style={styles.metaRow}>
+        <Meta label="זמן הכנה" value={recipe.prepTime} />
+        <Meta label="קושי" value={recipe.difficulty} />
+      </View>
+
+      <ResultSection title="מצרכים" items={recipe.ingredients} />
+      <ResultSection title="שלבים" items={recipe.steps} numbered />
+      <ResultSection title="תוספות מומלצות" items={recipe.sideDishes} />
+      <ResultSection title="רטבים" items={recipe.sauces} />
+    </AppCard>
+  );
+}
+
+function ExpertView({ answer }: { answer: ExpertAnswer }) {
+  return (
+    <AppCard elevated>
+      <Text style={styles.question}>{answer.question}</Text>
+      <Text style={styles.answer}>{answer.answer}</Text>
+      <ResultSection title="טיפים קצרים" items={answer.tips} numbered />
+    </AppCard>
+  );
+}
+
+function Meta({ label, value }: { label: string; value: string }) {
+  return (
+    <View style={styles.metaBox}>
+      <Text style={styles.metaLabel}>{label}</Text>
+      <Text style={styles.metaValue}>{value}</Text>
+    </View>
+  );
+}
+
+function ResultSection({ title, items, numbered = false }: { title: string; items: string[]; numbered?: boolean }) {
+  return (
+    <View style={styles.section}>
+      <Text style={styles.sectionTitle}>{title}</Text>
+      {items.map((item, index) => (
+        <View key={item} style={styles.itemRow}>
+          <Text style={styles.bullet}>{numbered ? index + 1 : '•'}</Text>
+          <Text style={styles.itemText}>{item}</Text>
+        </View>
+      ))}
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#090909' },
-  content: { padding: 20, gap: 14 },
-  title: { color: '#F7F7F7', fontSize: 28, fontWeight: '800', textAlign: 'right' },
-  card: { backgroundColor: '#171717', borderRadius: 12, borderWidth: 1, borderColor: '#2A2A2A', padding: 14, gap: 8 },
-  heading: { color: '#fff', fontSize: 20, fontWeight: '700', textAlign: 'right' },
-  summary: { color: '#FF9B4A', textAlign: 'right' },
-  step: { color: '#ddd', lineHeight: 22, textAlign: 'right' },
-  button: { backgroundColor: '#FF7A1A', borderRadius: 12, padding: 16, alignItems: 'center' },
-  buttonText: { color: '#111', fontSize: 18, fontWeight: '800' },
+  recipeTitle: {
+    color: smokeColors.text,
+    fontSize: 30,
+    fontWeight: '900',
+    lineHeight: 37,
+    ...rtlText,
+  },
+  metaRow: {
+    flexDirection: 'row-reverse',
+    gap: 10,
+  },
+  metaBox: {
+    flex: 1,
+    gap: 5,
+    borderRadius: 16,
+    backgroundColor: '#120B08',
+    padding: 13,
+  },
+  metaLabel: {
+    color: smokeColors.muted,
+    fontSize: 12,
+    fontWeight: '800',
+    ...rtlText,
+  },
+  metaValue: {
+    color: smokeColors.orange,
+    fontSize: 17,
+    fontWeight: '900',
+    ...rtlText,
+  },
+  section: {
+    gap: 8,
+    marginTop: 2,
+  },
+  sectionTitle: {
+    color: smokeColors.gold,
+    fontSize: 18,
+    fontWeight: '900',
+    ...rtlText,
+  },
+  itemRow: {
+    flexDirection: 'row-reverse',
+    gap: 10,
+    borderRadius: 14,
+    backgroundColor: '#120B08',
+    padding: 12,
+  },
+  bullet: {
+    width: 24,
+    color: smokeColors.orange,
+    fontSize: 17,
+    fontWeight: '900',
+    textAlign: 'center',
+  },
+  itemText: {
+    flex: 1,
+    color: smokeColors.text,
+    fontSize: 15,
+    lineHeight: 23,
+    ...rtlText,
+  },
+  question: {
+    borderRadius: 16,
+    backgroundColor: '#120B08',
+    color: smokeColors.gold,
+    fontSize: 17,
+    lineHeight: 25,
+    padding: 14,
+    ...rtlText,
+  },
+  answer: {
+    color: smokeColors.text,
+    fontSize: 17,
+    lineHeight: 26,
+    ...rtlText,
+  },
+  nextTitle: {
+    color: smokeColors.text,
+    fontSize: 22,
+    fontWeight: '900',
+    ...rtlText,
+  },
+  actionGrid: {
+    flexDirection: 'row-reverse',
+    gap: 10,
+  },
+  actionButton: {
+    flex: 1,
+  },
 });

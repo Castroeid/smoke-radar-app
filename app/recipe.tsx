@@ -1,49 +1,191 @@
 import { router, useLocalSearchParams } from 'expo-router';
 import { useState } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
+
+import { AppButton } from '@/components/AppButton';
+import { AppCard } from '@/components/AppCard';
+import { AppScreen } from '@/components/AppScreen';
+import { SectionTitle } from '@/components/SectionTitle';
+import { rtlText, smokeColors } from '@/constants/smokeTheme';
 import { generateRecipe } from '@/services/smokeRadarService';
+
+const methods = ['מעשנה', 'גריל פחמים', 'תנור ביתי'];
+const efforts = ['מהיר', 'מאוזן', 'מושקע'];
 
 export default function RecipeScreen() {
   const { meat } = useLocalSearchParams<{ meat?: string }>();
-  const selectedMeat = typeof meat === 'string' ? meat : 'בריסקט';
+  const selectedCut = typeof meat === 'string' && meat.length > 0 ? meat : 'אסאדו מעושן';
   const [step, setStep] = useState(1);
-  const [style, setStyle] = useState('מעושן קלאסי');
-  const [level, setLevel] = useState('קל');
+  const [method, setMethod] = useState(methods[0]);
+  const [effort, setEffort] = useState(efforts[1]);
 
-  const onGenerate = async () => {
-    const recipe = await generateRecipe({ meat: selectedMeat, style, level });
-    router.push({ pathname: '/result', params: { source: 'recipe', payload: JSON.stringify(recipe) } });
+  const generate = async () => {
+    const recipe = await generateRecipe({ cut: selectedCut, method, effort });
+    router.push({ pathname: '/result', params: { source: 'recipe', payload: JSON.stringify(recipe), meat: selectedCut } });
   };
 
   return (
-    <View style={styles.container}>
-      <Text style={styles.title}>מחולל מתכון ל-{selectedMeat}</Text>
-      {step === 1 && (
-        <>
-          <Text style={styles.label}>שלב 1: בחר סגנון</Text>
-          <Pressable style={styles.option} onPress={() => setStyle('מעושן קלאסי')}><Text style={styles.text}>מעושן קלאסי</Text></Pressable>
-          <Pressable style={styles.option} onPress={() => setStyle('מתקתק-חריף')}><Text style={styles.text}>מתקתק-חריף</Text></Pressable>
-          <Pressable style={styles.button} onPress={() => setStep(2)}><Text style={styles.buttonText}>המשך</Text></Pressable>
-        </>
-      )}
-      {step === 2 && (
-        <>
-          <Text style={styles.label}>שלב 2: רמת ניסיון</Text>
-          <Pressable style={styles.option} onPress={() => setLevel('קל')}><Text style={styles.text}>קל</Text></Pressable>
-          <Pressable style={styles.option} onPress={() => setLevel('מתקדם')}><Text style={styles.text}>מתקדם</Text></Pressable>
-          <Pressable style={styles.button} onPress={onGenerate}><Text style={styles.buttonText}>צור מתכון</Text></Pressable>
-        </>
-      )}
-    </View>
+    <AppScreen>
+      <SectionTitle
+        eyebrow="מחולל מתכונים"
+        title="בונים מנה בכמה נגיעות"
+        subtitle={`הנתח שנבחר: ${selectedCut}`}
+      />
+
+      <View style={styles.progress}>
+        {[1, 2, 3].map((item) => (
+          <View key={item} style={[styles.dot, item <= step && styles.dotActive]}>
+            <Text style={[styles.dotText, item <= step && styles.dotTextActive]}>{item}</Text>
+          </View>
+        ))}
+      </View>
+
+      {step === 1 ? (
+        <AppCard>
+          <Text style={styles.stepTitle}>1. הנתח שנבחר</Text>
+          <Text style={styles.selectedCut}>{selectedCut}</Text>
+          <Text style={styles.helper}>אפשר לחזור לרדאר בכל רגע ולבחור מנה אחרת.</Text>
+          <AppButton title="המשך לשיטת בישול" onPress={() => setStep(2)} />
+        </AppCard>
+      ) : null}
+
+      {step === 2 ? (
+        <ChoiceStep
+          title="2. שיטת בישול"
+          options={methods}
+          value={method}
+          onSelect={setMethod}
+          onBack={() => setStep(1)}
+          onNext={() => setStep(3)}
+        />
+      ) : null}
+
+      {step === 3 ? (
+        <ChoiceStep
+          title="3. זמן ורמת השקעה"
+          options={efforts}
+          value={effort}
+          onSelect={setEffort}
+          onBack={() => setStep(2)}
+          onNext={generate}
+          nextTitle="חוללו מתכון"
+        />
+      ) : null}
+    </AppScreen>
+  );
+}
+
+type ChoiceStepProps = {
+  title: string;
+  options: string[];
+  value: string;
+  onSelect: (value: string) => void;
+  onBack: () => void;
+  onNext: () => void;
+  nextTitle?: string;
+};
+
+function ChoiceStep({ title, options, value, onSelect, onBack, onNext, nextTitle = 'המשך' }: ChoiceStepProps) {
+  return (
+    <AppCard>
+      <Text style={styles.stepTitle}>{title}</Text>
+      <View style={styles.options}>
+        {options.map((option) => {
+          const selected = option === value;
+
+          return (
+            <Pressable key={option} style={[styles.option, selected && styles.optionSelected]} onPress={() => onSelect(option)}>
+              <Text style={[styles.optionText, selected && styles.optionTextSelected]}>{option}</Text>
+            </Pressable>
+          );
+        })}
+      </View>
+      <View style={styles.buttonRow}>
+        <AppButton title="חזרה" variant="ghost" onPress={onBack} style={styles.rowButton} />
+        <AppButton title={nextTitle} onPress={onNext} style={styles.rowButtonWide} />
+      </View>
+    </AppCard>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#090909', padding: 20, gap: 12 },
-  title: { color: '#F7F7F7', fontSize: 28, fontWeight: '800', textAlign: 'right' },
-  label: { color: '#BDBDBD', fontSize: 17, marginTop: 6, textAlign: 'right' },
-  option: { backgroundColor: '#171717', borderWidth: 1, borderColor: '#2A2A2A', borderRadius: 12, padding: 14 },
-  text: { color: '#F2F2F2', fontSize: 17, textAlign: 'right' },
-  button: { backgroundColor: '#FF7A1A', borderRadius: 12, padding: 16, marginTop: 8, alignItems: 'center' },
-  buttonText: { color: '#111', fontSize: 18, fontWeight: '800' },
+  progress: {
+    flexDirection: 'row-reverse',
+    gap: 10,
+  },
+  dot: {
+    width: 42,
+    height: 42,
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderRadius: 21,
+    borderWidth: 1,
+    borderColor: smokeColors.border,
+    backgroundColor: smokeColors.surface,
+  },
+  dotActive: {
+    borderColor: smokeColors.orange,
+    backgroundColor: '#2D160E',
+  },
+  dotText: {
+    color: smokeColors.soft,
+    fontSize: 16,
+    fontWeight: '900',
+  },
+  dotTextActive: {
+    color: smokeColors.orange,
+  },
+  stepTitle: {
+    color: smokeColors.text,
+    fontSize: 24,
+    fontWeight: '900',
+    ...rtlText,
+  },
+  selectedCut: {
+    color: smokeColors.orange,
+    fontSize: 32,
+    fontWeight: '900',
+    ...rtlText,
+  },
+  helper: {
+    color: smokeColors.muted,
+    fontSize: 15,
+    lineHeight: 23,
+    ...rtlText,
+  },
+  options: {
+    gap: 10,
+  },
+  option: {
+    minHeight: 58,
+    justifyContent: 'center',
+    borderRadius: 16,
+    borderWidth: 1,
+    borderColor: smokeColors.border,
+    backgroundColor: smokeColors.surfaceAlt,
+    paddingHorizontal: 16,
+  },
+  optionSelected: {
+    borderColor: smokeColors.orange,
+    backgroundColor: '#2A150D',
+  },
+  optionText: {
+    color: smokeColors.muted,
+    fontSize: 17,
+    fontWeight: '900',
+    ...rtlText,
+  },
+  optionTextSelected: {
+    color: smokeColors.text,
+  },
+  buttonRow: {
+    flexDirection: 'row-reverse',
+    gap: 10,
+  },
+  rowButton: {
+    flex: 1,
+  },
+  rowButtonWide: {
+    flex: 1.6,
+  },
 });

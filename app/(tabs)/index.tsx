@@ -1,27 +1,117 @@
 import { router } from 'expo-router';
-import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { StyleSheet, Text, View } from 'react-native';
+
+import { AppButton } from '@/components/AppButton';
+import { AppCard } from '@/components/AppCard';
+import { AppScreen } from '@/components/AppScreen';
+import { rtlText, smokeColors } from '@/constants/smokeTheme';
 
 export default function HomeScreen() {
   return (
-    <View style={styles.container}>
-      <View style={styles.content}>
-        <Text style={styles.badge}>Smoke Radar</Text>
-        <Text style={styles.title}>ברוכים הבאים לרדאר העשן</Text>
-        <Text style={styles.subtitle}>מגלים מה חם עכשיו ומתקדמים למסלול שמתאים בדיוק לארוחה שלך.</Text>
-        <Pressable style={styles.button} onPress={() => router.push('/radar')}>
-          <Text style={styles.buttonText}>התחל רדאר</Text>
-        </Pressable>
+    <AppScreen scroll={false} style={styles.screen}>
+      <View style={styles.top}>
+        <Text style={styles.logo}>SMOKE RADAR</Text>
+        <View style={styles.radar}>
+          <View style={styles.ringLarge}>
+            <View style={styles.ringMedium}>
+              <View style={styles.ringSmall}>
+                <Text style={styles.radarText}>חם</Text>
+              </View>
+            </View>
+          </View>
+        </View>
       </View>
-    </View>
+
+      <View style={styles.copy}>
+        <Text style={styles.title}>ברוכים הבאים לרדאר העשן</Text>
+        <Text style={styles.subtitle}>הטעם הבא שלכם מתחיל כאן</Text>
+      </View>
+
+      <AppCard style={styles.startCard}>
+        <Text style={styles.cardText}>סרקו טרנדים, בחרו מנה, וקבלו מסלול מהיר למתכון, מומחה או קצבייה.</Text>
+        <AppButton title="התחילו" onPress={() => router.push('/radar')} />
+      </AppCard>
+    </AppScreen>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#090909' },
-  content: { flex: 1, justifyContent: 'center', paddingHorizontal: 24, gap: 16 },
-  badge: { color: '#FF9B4A', fontSize: 14, textAlign: 'right' },
-  title: { color: '#F5F5F5', fontSize: 34, fontWeight: '800', textAlign: 'right', lineHeight: 42 },
-  subtitle: { color: '#B4B4B4', fontSize: 16, textAlign: 'right', lineHeight: 24 },
-  button: { backgroundColor: '#FF6A00', paddingVertical: 16, borderRadius: 14, alignItems: 'center', marginTop: 6 },
-  buttonText: { color: '#111', fontSize: 18, fontWeight: '800' },
+  screen: {
+    flex: 1,
+    justifyContent: 'space-between',
+  },
+  top: {
+    gap: 22,
+  },
+  logo: {
+    color: smokeColors.gold,
+    fontSize: 18,
+    fontWeight: '900',
+    letterSpacing: 0,
+    textAlign: 'center',
+  },
+  radar: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 24,
+  },
+  ringLarge: {
+    width: 230,
+    height: 230,
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderRadius: 115,
+    borderWidth: 1,
+    borderColor: '#3A2118',
+    backgroundColor: '#110B08',
+  },
+  ringMedium: {
+    width: 164,
+    height: 164,
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderRadius: 82,
+    borderWidth: 2,
+    borderColor: smokeColors.ember,
+    backgroundColor: '#1A100B',
+  },
+  ringSmall: {
+    width: 86,
+    height: 86,
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderRadius: 43,
+    backgroundColor: smokeColors.orange,
+  },
+  radarText: {
+    color: smokeColors.black,
+    fontSize: 22,
+    fontWeight: '900',
+    ...rtlText,
+  },
+  copy: {
+    gap: 10,
+  },
+  title: {
+    color: smokeColors.text,
+    fontSize: 36,
+    fontWeight: '900',
+    lineHeight: 43,
+    ...rtlText,
+  },
+  subtitle: {
+    color: smokeColors.orange,
+    fontSize: 20,
+    fontWeight: '900',
+    ...rtlText,
+  },
+  startCard: {
+    marginBottom: 6,
+  },
+  cardText: {
+    color: smokeColors.muted,
+    fontSize: 16,
+    lineHeight: 25,
+    ...rtlText,
+  },
 });

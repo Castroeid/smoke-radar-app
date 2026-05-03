@@ -1,36 +1,49 @@
-export type RecipeRequest = {
-  meat: string;
-  style: string;
-  level: string;
-};
+import { apiRequest } from '@/services/apiClient';
+import { shouldUseMockData, smokeRadarEndpoints } from '@/services/apiConfig';
+import {
+  askMockExpert,
+  findMockNearbyButchers,
+  generateMockRecipe,
+  getMockTrendingCuts,
+} from '@/services/smokeRadarMock';
+import type { Butcher, ExpertAnswer, RadarCut, RecipeRequest, RecipeResult } from '@/services/smokeRadarTypes';
 
-export async function getTrendingCuts() {
-  // TODO: Replace with real API call when endpoint is available.
-  return [
-    { id: '1', title: 'בריסקט', description: 'נתח מוביל לעישון ארוך', momentum: '+87%' },
-    { id: '2', title: 'אסאדו', description: 'שומניות מדויקת לצלייה איטית', momentum: '+74%' },
-    { id: '3', title: 'פיקניה', description: 'נתח פרימיום שגדל מהר בטרנדים', momentum: '+69%' },
-  ];
+export type { Butcher, ExpertAnswer, RadarCut, RecipeRequest, RecipeResult } from '@/services/smokeRadarTypes';
+
+export async function getTrendingCuts(): Promise<RadarCut[]> {
+  if (shouldUseMockData()) {
+    return getMockTrendingCuts();
+  }
+
+  return apiRequest<RadarCut[]>(smokeRadarEndpoints.trends);
 }
 
-export async function generateRecipe(req: RecipeRequest) {
-  // TODO: Replace mock with backend integration.
-  return {
-    title: `מתכון ${req.style} ל-${req.meat}`,
-    summary: `רמת ${req.level} · הכנה משוערת: 3 שעות`,
-    steps: ['לתבל היטב עם מלח גס ופלפל שחור.', 'לחמם מעשנה ל-120 מעלות.', 'לעשן עד ליבה רצויה ולהגיש חם.'],
-  };
+export async function generateRecipe(req: RecipeRequest): Promise<RecipeResult> {
+  if (shouldUseMockData()) {
+    return generateMockRecipe(req);
+  }
+
+  return apiRequest<RecipeResult>(smokeRadarEndpoints.recipe, {
+    method: 'POST',
+    body: req,
+  });
 }
 
-export async function askExpert(question: string) {
-  // TODO: Replace mock with LLM/knowledge endpoint.
-  return `שאלה מצוינת. לגבי "${question}": מומלץ להתחיל בצריבה קצרה ואז לעבור לחום עקיף לשמירה על עסיסיות.`;
+export async function askExpert(question: string): Promise<ExpertAnswer> {
+  if (shouldUseMockData()) {
+    return askMockExpert(question);
+  }
+
+  return apiRequest<ExpertAnswer>(smokeRadarEndpoints.expert, {
+    method: 'POST',
+    body: { question },
+  });
 }
 
-export async function findNearbyButchers() {
-  // TODO: Replace with location-aware search endpoint.
-  return [
-    { name: 'קצביית הגחלים', distance: '1.2 ק"מ' },
-    { name: 'בשרים על האש', distance: '2.8 ק"מ' },
-  ];
+export async function findNearbyButchers(): Promise<Butcher[]> {
+  if (shouldUseMockData()) {
+    return findMockNearbyButchers();
+  }
+
+  return apiRequest<Butcher[]>(smokeRadarEndpoints.butchers);
 }

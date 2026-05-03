@@ -1,39 +1,63 @@
 import { router, useLocalSearchParams } from 'expo-router';
-import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { StyleSheet, Text, View } from 'react-native';
+
+import { AppButton } from '@/components/AppButton';
+import { AppCard } from '@/components/AppCard';
+import { AppScreen } from '@/components/AppScreen';
+import { SectionTitle } from '@/components/SectionTitle';
+import { rtlText, smokeColors } from '@/constants/smokeTheme';
 
 export default function SelectionScreen() {
   const { meat } = useLocalSearchParams<{ meat?: string }>();
-  const selectedMeat = typeof meat === 'string' && meat.length > 0 ? meat : 'נתח לא ידוע';
+  const selectedCut = typeof meat === 'string' && meat.length > 0 ? meat : 'המנה שנבחרה';
 
   return (
-    <View style={styles.container}>
-      <Text style={styles.title}>בחר מה ממשיכים עכשיו</Text>
-      <Text style={styles.selectedMeat}>הנתח שבחרת: {selectedMeat}</Text>
+    <AppScreen scroll={false} style={styles.screen}>
+      <SectionTitle title="מה תרצו לעשות?" subtitle={`בחרתם: ${selectedCut}`} />
+
+      <AppCard style={styles.cutCard}>
+        <Text style={styles.cutLabel}>המסלול הבא שלכם</Text>
+        <Text style={styles.cutTitle}>{selectedCut}</Text>
+      </AppCard>
 
       <View style={styles.actions}>
-        <Pressable style={styles.primaryButton} onPress={() => router.push({ pathname: '/recipe', params: { meat: selectedMeat } })}>
-          <Text style={styles.primaryButtonText}>מחולל מתכון</Text>
-        </Pressable>
-
-        <Pressable style={styles.secondaryButton} onPress={() => router.push('/expert')}>
-          <Text style={styles.secondaryButtonText}>שאל את המומחה</Text>
-        </Pressable>
-
-        <Pressable style={styles.secondaryButton} onPress={() => router.push('/butcher')}>
-          <Text style={styles.secondaryButtonText}>מצא קצביה קרובה</Text>
-        </Pressable>
+        <AppButton title="לחולל מתכון" onPress={() => router.push({ pathname: '/recipe', params: { meat: selectedCut } })} />
+        <AppButton
+          title="לשאול את המומחה"
+          variant="secondary"
+          onPress={() => router.push({ pathname: '/expert', params: { meat: selectedCut } })}
+        />
+        <AppButton
+          title="למצוא קצבייה קרובה"
+          variant="secondary"
+          onPress={() => router.push({ pathname: '/butcher', params: { meat: selectedCut } })}
+        />
       </View>
-    </View>
+    </AppScreen>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#090909', paddingHorizontal: 20, paddingTop: 40 },
-  title: { color: '#F7F7F7', fontSize: 30, fontWeight: '800', textAlign: 'right' },
-  selectedMeat: { color: '#FF9B4A', fontSize: 20, marginTop: 16, textAlign: 'right' },
-  actions: { marginTop: 32, gap: 14 },
-  primaryButton: { minHeight: 56, borderRadius: 14, justifyContent: 'center', alignItems: 'center', backgroundColor: '#FF7A1A' },
-  primaryButtonText: { color: '#111', fontSize: 18, fontWeight: '800' },
-  secondaryButton: { minHeight: 56, borderRadius: 14, justifyContent: 'center', alignItems: 'center', backgroundColor: '#1B1B1B', borderColor: '#2A2A2A', borderWidth: 1 },
-  secondaryButtonText: { color: '#F2F2F2', fontSize: 17, fontWeight: '700' },
+  screen: {
+    flex: 1,
+    justifyContent: 'center',
+  },
+  cutCard: {
+    borderColor: smokeColors.orange,
+  },
+  cutLabel: {
+    color: smokeColors.muted,
+    fontSize: 14,
+    fontWeight: '800',
+    ...rtlText,
+  },
+  cutTitle: {
+    color: smokeColors.text,
+    fontSize: 34,
+    fontWeight: '900',
+    ...rtlText,
+  },
+  actions: {
+    gap: 12,
+  },
 });
