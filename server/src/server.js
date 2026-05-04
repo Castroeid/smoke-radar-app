@@ -1,6 +1,7 @@
 import { createServer } from 'node:http';
 
-import { buildExpertAnswer, buildRecipe, butchers, trendingCuts } from './mockData.js';
+import { answerExpertWithAi, generateRecipeWithAi } from './aiService.js';
+import { butchers, trendingCuts } from './mockData.js';
 import { readJson, sendJson, sendOptions } from './http.js';
 
 export async function route(req, res) {
@@ -23,13 +24,13 @@ export async function route(req, res) {
 
   if (req.method === 'POST' && url.pathname === '/recipes/generate') {
     const body = await readJson(req);
-    sendJson(res, 200, buildRecipe(body));
+    sendJson(res, 200, await generateRecipeWithAi(body));
     return;
   }
 
   if (req.method === 'POST' && url.pathname === '/expert/ask') {
     const body = await readJson(req);
-    sendJson(res, 200, buildExpertAnswer(body.question));
+    sendJson(res, 200, await answerExpertWithAi(body.question));
     return;
   }
 

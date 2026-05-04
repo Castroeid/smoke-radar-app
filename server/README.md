@@ -36,3 +36,19 @@ EXPO_PUBLIC_SMOKE_RADAR_API_URL=https://your-render-service.onrender.com
 ```
 
 Do not put private API keys in the Expo app. Add them to Render environment variables when real integrations are added.
+
+## OpenAI integration
+
+The server can answer expert questions and generate recipes with OpenAI when this environment variable is set in Render:
+
+```env
+OPENAI_API_KEY=your_openai_api_key
+```
+
+Optional:
+
+```env
+OPENAI_MODEL=gpt-5.2
+```
+
+If `OPENAI_API_KEY` is missing or the OpenAI request fails, the server falls back to mock responses so the app keeps working.
