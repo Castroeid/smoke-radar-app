@@ -12,13 +12,20 @@ export type RecipeRequest = {
   effort: string;
 };
 
+export type RecipeSideDish = {
+  title: string;
+  description: string;
+  steps: string[];
+};
+
 export type RecipeResult = {
   title: string;
   prepTime: string;
   difficulty: string;
   ingredients: string[];
+  methodGuide: string[];
   steps: string[];
-  sideDishes: string[];
+  sideDishes: RecipeSideDish[];
   sauces: string[];
 };
 

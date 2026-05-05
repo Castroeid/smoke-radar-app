@@ -13,13 +13,16 @@ const recipeInstructions = `
 אתה מחולל מתכונים לאפליקציית Smoke Radar.
 החזר מתכון בעברית בלבד.
 שמור על סגנון פרימיום, מעשי ופשוט לביצוע בבית.
+אל תשתמש ב-Markdown: בלי כותרות ##, בלי הדגשות **, בלי טבלאות ובלי רשימות Markdown.
+המתכון חייב להיות מפורט לפי שיטת הבישול שנבחרה: להסביר מה השיטה אומרת, באיזה חום עובדים, כמה זמן בערך, מתי הופכים או מסובבים, מתי עוטפים אם רלוונטי, ומתי נותנים מנוחה.
 הקפד שלתוספות ולרטבים יהיו שמות ייחודיים ולא כפולים.
+לכל תוספת החזר גם הסבר קצר וגם שלבי הכנה ברורים.
 `;
 
 const recipeSchema = {
   type: 'object',
   additionalProperties: false,
-  required: ['title', 'prepTime', 'difficulty', 'ingredients', 'steps', 'sideDishes', 'sauces'],
+  required: ['title', 'prepTime', 'difficulty', 'ingredients', 'methodGuide', 'steps', 'sideDishes', 'sauces'],
   properties: {
     title: { type: 'string' },
     prepTime: { type: 'string' },
@@ -30,17 +33,37 @@ const recipeSchema = {
       maxItems: 10,
       items: { type: 'string' },
     },
-    steps: {
+    methodGuide: {
       type: 'array',
       minItems: 4,
       maxItems: 7,
+      items: { type: 'string' },
+    },
+    steps: {
+      type: 'array',
+      minItems: 5,
+      maxItems: 9,
       items: { type: 'string' },
     },
     sideDishes: {
       type: 'array',
       minItems: 2,
       maxItems: 2,
-      items: { type: 'string' },
+      items: {
+        type: 'object',
+        additionalProperties: false,
+        required: ['title', 'description', 'steps'],
+        properties: {
+          title: { type: 'string' },
+          description: { type: 'string' },
+          steps: {
+            type: 'array',
+            minItems: 3,
+            maxItems: 5,
+            items: { type: 'string' },
+          },
+        },
+      },
     },
     sauces: {
       type: 'array',
@@ -59,7 +82,7 @@ export async function generateRecipeWithAi(req) {
   try {
     const output = await createOpenAiResponse({
       instructions: recipeInstructions,
-      input: `צור מתכון לפי הפרטים הבאים: ${JSON.stringify(req)}`,
+      input: `צור מתכון מפורט לפי הפרטים הבאים: ${JSON.stringify(req)}. אם השיטה היא מעשנה, פרט חום, עשן, זמן, סיבוב או היפוך, עטיפה ומנוחה. אם זו גריל או פלנצ'ה, פרט אזור חם, אזור עקיף, צריבה, היפוך ומנוחה.`,
       text: {
         format: {
           type: 'json_schema',
@@ -68,7 +91,7 @@ export async function generateRecipeWithAi(req) {
           schema: recipeSchema,
         },
       },
-      maxOutputTokens: 1200,
+      maxOutputTokens: 1800,
     });
 
     return JSON.parse(output);

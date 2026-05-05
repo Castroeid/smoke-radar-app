@@ -1,15 +1,18 @@
 import { router, useLocalSearchParams } from 'expo-router';
-import { Share, StyleSheet, Text, View } from 'react-native';
+import { useMemo, useState } from 'react';
+import { Pressable, Share, StyleSheet, Text, View } from 'react-native';
 
 import { AppButton } from '@/components/AppButton';
 import { AppCard } from '@/components/AppCard';
 import { AppScreen } from '@/components/AppScreen';
 import { SectionTitle } from '@/components/SectionTitle';
 import { rtlText, smokeColors } from '@/constants/smokeTheme';
-import type { ExpertAnswer, RecipeResult } from '@/services/smokeRadarService';
+import type { ExpertAnswer, RecipeResult, RecipeSideDish } from '@/services/smokeRadarTypes';
+
+type ResultSource = 'recipe' | 'expert';
 
 export default function ResultScreen() {
-  const { source, payload, meat } = useLocalSearchParams<{ source?: string; payload?: string; meat?: string }>();
+  const { source, payload, meat } = useLocalSearchParams<{ source?: ResultSource; payload?: string; meat?: string }>();
   const selectedCut = typeof meat === 'string' && meat.length > 0 ? meat : 'המנה';
   const title = source === 'recipe' ? 'המתכון שלכם מוכן' : 'תשובה מהמומחה';
 
@@ -26,15 +29,26 @@ export default function ResultScreen() {
     router.push({ pathname: '/recipe', params: { meat: selectedCut } });
   };
 
+  const goToShopping = () => {
+    if (!payload) {
+      return;
+    }
+
+    router.push({ pathname: '/shopping', params: { payload, meat: selectedCut } });
+  };
+
+  const parsedPayload = useMemo(() => parsePayload(payload), [payload]);
+
   return (
     <AppScreen>
-      <SectionTitle title={title} subtitle="אפשר להמשיך, לשתף או לחזור לרדאר." />
+      <SectionTitle title={title} subtitle="אפשר להמשיך לרשימת קניות, לשתף או לחזור לרדאר." />
 
-      {source === 'recipe' && payload ? <RecipeView recipe={JSON.parse(payload) as RecipeResult} /> : null}
-      {source === 'expert' && payload ? <ExpertView answer={JSON.parse(payload) as ExpertAnswer} /> : null}
+      {source === 'recipe' && parsedPayload ? <RecipeView recipe={parsedPayload as RecipeResult} /> : null}
+      {source === 'expert' && parsedPayload ? <ExpertView answer={parsedPayload as ExpertAnswer} /> : null}
 
       <AppCard>
         <Text style={styles.nextTitle}>פעולות המשך</Text>
+        {source === 'recipe' ? <AppButton title="המשך למצרכים" onPress={goToShopping} /> : null}
         <View style={styles.actionGrid}>
           <AppButton title="נסו שוב" variant="secondary" onPress={tryAgain} style={styles.actionButton} />
           <AppButton title="חזרו לרדאר" onPress={() => router.push('/radar')} style={styles.actionButton} />
@@ -46,19 +60,50 @@ export default function ResultScreen() {
 }
 
 function RecipeView({ recipe }: { recipe: RecipeResult }) {
+  const methodGuide = getMethodGuide(recipe);
+  const sideDishes = normalizeSideDishes(recipe.sideDishes);
+
   return (
     <AppCard elevated>
-      <Text style={styles.recipeTitle}>{recipe.title}</Text>
+      <Text style={styles.recipeTitle}>{cleanInlineText(recipe.title)}</Text>
       <View style={styles.metaRow}>
         <Meta label="זמן הכנה" value={recipe.prepTime} />
         <Meta label="קושי" value={recipe.difficulty} />
       </View>
 
       <ResultSection title="מצרכים" items={recipe.ingredients} />
-      <ResultSection title="שלבים" items={recipe.steps} numbered />
-      <ResultSection title="תוספות מומלצות" items={recipe.sideDishes} />
+      <ResultSection title="מדריך שיטת הבישול" items={methodGuide} numbered />
+      <ResultSection title="שלבי הכנה" items={recipe.steps} numbered />
+      <SideDishSection sideDishes={sideDishes} />
       <ResultSection title="רטבים" items={recipe.sauces} />
     </AppCard>
+  );
+}
+
+function SideDishSection({ sideDishes }: { sideDishes: RecipeSideDish[] }) {
+  const [openIndex, setOpenIndex] = useState(0);
+
+  return (
+    <View style={styles.section}>
+      <Text style={styles.sectionTitle}>תוספות עם הכנה</Text>
+      {sideDishes.map((dish, index) => {
+        const isOpen = openIndex === index;
+
+        return (
+          <Pressable
+            key={`${dish.title}-${index}`}
+            style={[styles.sideCard, isOpen && styles.sideCardOpen]}
+            onPress={() => setOpenIndex(isOpen ? -1 : index)}>
+            <View style={styles.sideHeader}>
+              <Text style={styles.chevron}>{isOpen ? '−' : '+'}</Text>
+              <Text style={styles.sideTitle}>{cleanInlineText(dish.title)}</Text>
+            </View>
+            <Text style={styles.sideDescription}>{cleanInlineText(dish.description)}</Text>
+            {isOpen ? <ResultSection title="איך מכינים" items={dish.steps} numbered compact /> : null}
+          </Pressable>
+        );
+      })}
+    </View>
   );
 }
 
@@ -70,7 +115,9 @@ function ExpertView({ answer }: { answer: ExpertAnswer }) {
       <Text style={styles.question}>{answer.question}</Text>
       <View style={styles.answerBlock}>
         {paragraphs.map((paragraph) => (
-          <Text key={paragraph} style={styles.answer}>{paragraph}</Text>
+          <Text key={paragraph} style={styles.answer}>
+            {paragraph}
+          </Text>
         ))}
       </View>
       <ResultSection title="טיפים קצרים" items={answer.tips.map(cleanInlineText)} numbered />
@@ -87,18 +134,67 @@ function Meta({ label, value }: { label: string; value: string }) {
   );
 }
 
-function ResultSection({ title, items, numbered = false }: { title: string; items: string[]; numbered?: boolean }) {
+function ResultSection({
+  title,
+  items,
+  numbered = false,
+  compact = false,
+}: {
+  title: string;
+  items: string[];
+  numbered?: boolean;
+  compact?: boolean;
+}) {
   return (
-    <View style={styles.section}>
-      <Text style={styles.sectionTitle}>{title}</Text>
+    <View style={[styles.section, compact && styles.compactSection]}>
+      <Text style={[styles.sectionTitle, compact && styles.compactTitle]}>{title}</Text>
       {items.map((item, index) => (
-        <View key={`${title}-${index}-${item}`} style={styles.itemRow}>
+        <View key={`${title}-${index}-${item}`} style={[styles.itemRow, compact && styles.compactRow]}>
           <Text style={styles.bullet}>{numbered ? index + 1 : '•'}</Text>
           <Text style={styles.itemText}>{cleanInlineText(item)}</Text>
         </View>
       ))}
     </View>
   );
+}
+
+function parsePayload(payload?: string) {
+  if (!payload) {
+    return null;
+  }
+
+  try {
+    return JSON.parse(payload);
+  } catch {
+    return null;
+  }
+}
+
+function getMethodGuide(recipe: RecipeResult) {
+  if (Array.isArray(recipe.methodGuide) && recipe.methodGuide.length > 0) {
+    return recipe.methodGuide;
+  }
+
+  return [
+    'עובדים בחום יציב ומתאימים את הקצב לעובי הנתח.',
+    'צורבים או מעשנים לפי השיטה שנבחרה, ואז ממשיכים בחום עקיף עד שהמרקם מתרכך.',
+    'הופכים מעט ככל האפשר ובודקים לפי מרקם וטמפרטורה, לא רק לפי זמן.',
+    'נותנים לנתח מנוחה לפני פריסה כדי לשמור על עסיסיות.',
+  ];
+}
+
+function normalizeSideDishes(sideDishes: RecipeResult['sideDishes'] | string[] = []) {
+  return sideDishes.map((dish) => {
+    if (typeof dish === 'string') {
+      return {
+        title: dish,
+        description: 'תוספת מומלצת ליד המנה, עם הכנה פשוטה ומהירה.',
+        steps: ['מתבלים לפי הטעם.', 'מבשלים או צורבים עד רכות.', 'מגישים חם לצד הבשר.'],
+      };
+    }
+
+    return dish;
+  });
 }
 
 function cleanExpertText(value: string) {
@@ -111,7 +207,10 @@ function cleanExpertText(value: string) {
     .replace(/\n{3,}/g, '\n\n')
     .trim();
 
-  return cleaned.split(/\n{2,}/).map((item) => item.trim()).filter(Boolean);
+  return cleaned
+    .split(/\n{2,}/)
+    .map((item) => item.trim())
+    .filter(Boolean);
 }
 
 function cleanInlineText(value: string) {
@@ -159,11 +258,17 @@ const styles = StyleSheet.create({
     gap: 8,
     marginTop: 2,
   },
+  compactSection: {
+    marginTop: 8,
+  },
   sectionTitle: {
     color: smokeColors.gold,
     fontSize: 18,
     fontWeight: '900',
     ...rtlText,
+  },
+  compactTitle: {
+    fontSize: 15,
   },
   itemRow: {
     flexDirection: 'row-reverse',
@@ -171,6 +276,10 @@ const styles = StyleSheet.create({
     borderRadius: 14,
     backgroundColor: '#120B08',
     padding: 12,
+  },
+  compactRow: {
+    backgroundColor: '#1A100C',
+    padding: 10,
   },
   bullet: {
     width: 24,
@@ -184,6 +293,42 @@ const styles = StyleSheet.create({
     color: smokeColors.text,
     fontSize: 15,
     lineHeight: 23,
+    ...rtlText,
+  },
+  sideCard: {
+    gap: 8,
+    borderRadius: 16,
+    borderWidth: 1,
+    borderColor: smokeColors.border,
+    backgroundColor: '#120B08',
+    padding: 13,
+  },
+  sideCardOpen: {
+    borderColor: smokeColors.orange,
+  },
+  sideHeader: {
+    flexDirection: 'row-reverse',
+    alignItems: 'center',
+    gap: 10,
+  },
+  chevron: {
+    width: 28,
+    color: smokeColors.orange,
+    fontSize: 24,
+    fontWeight: '900',
+    textAlign: 'center',
+  },
+  sideTitle: {
+    flex: 1,
+    color: smokeColors.text,
+    fontSize: 18,
+    fontWeight: '900',
+    ...rtlText,
+  },
+  sideDescription: {
+    color: smokeColors.muted,
+    fontSize: 15,
+    lineHeight: 22,
     ...rtlText,
   },
   question: {
