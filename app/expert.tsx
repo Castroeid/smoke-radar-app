@@ -13,11 +13,23 @@ export default function ExpertScreen() {
   const { meat } = useLocalSearchParams<{ meat?: string }>();
   const selectedCut = typeof meat === 'string' && meat.length > 0 ? meat : 'הנתח שבחרתם';
   const [question, setQuestion] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
 
   const submit = async () => {
     const text = question.trim() || `מה חשוב לדעת על ${selectedCut}?`;
-    const answer = await askExpert(text);
-    router.push({ pathname: '/result', params: { source: 'expert', payload: JSON.stringify(answer), meat: selectedCut } });
+
+    setLoading(true);
+    setError('');
+
+    try {
+      const answer = await askExpert(text);
+      router.push({ pathname: '/result', params: { source: 'expert', payload: JSON.stringify(answer), meat: selectedCut } });
+    } catch {
+      setError('לא הצלחנו לקבל תשובה כרגע. נסו שוב בעוד רגע.');
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -25,7 +37,7 @@ export default function ExpertScreen() {
       <SectionTitle
         eyebrow="שאל את המומחה"
         title="שאלה מהירה על בשר, אש ועשן"
-        subtitle="זהו מסלול נפרד ממחולל המתכונים. כרגע התשובה היא mock בעברית."
+        subtitle="זהו מסלול נפרד ממחולל המתכונים. התשובה מגיעה מהשרת כשהחיבור זמין."
       />
 
       <AppCard>
@@ -44,7 +56,8 @@ export default function ExpertScreen() {
           <Text style={styles.contextLabel}>הקשר</Text>
           <Text style={styles.contextValue}>{selectedCut}</Text>
         </View>
-        <AppButton title="שלחו שאלה" onPress={submit} />
+        {error ? <Text style={styles.error}>{error}</Text> : null}
+        <AppButton title={loading ? 'מכין תשובה...' : 'שלחו שאלה'} onPress={submit} />
       </AppCard>
     </AppScreen>
   );
@@ -86,6 +99,12 @@ const styles = StyleSheet.create({
     color: smokeColors.orange,
     fontSize: 15,
     fontWeight: '900',
+    ...rtlText,
+  },
+  error: {
+    color: smokeColors.gold,
+    fontSize: 14,
+    lineHeight: 22,
     ...rtlText,
   },
 });

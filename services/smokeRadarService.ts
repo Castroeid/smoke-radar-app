@@ -15,7 +15,12 @@ export async function getTrendingCuts(): Promise<RadarCut[]> {
     return getMockTrendingCuts();
   }
 
-  return apiRequest<RadarCut[]>(smokeRadarEndpoints.trends);
+  try {
+    return await apiRequest<RadarCut[]>(smokeRadarEndpoints.trends);
+  } catch (error) {
+    console.warn('Using mock trends after API failure:', error);
+    return getMockTrendingCuts();
+  }
 }
 
 export async function generateRecipe(req: RecipeRequest): Promise<RecipeResult> {
@@ -23,10 +28,15 @@ export async function generateRecipe(req: RecipeRequest): Promise<RecipeResult> 
     return generateMockRecipe(req);
   }
 
-  return apiRequest<RecipeResult>(smokeRadarEndpoints.recipe, {
-    method: 'POST',
-    body: req,
-  });
+  try {
+    return await apiRequest<RecipeResult>(smokeRadarEndpoints.recipe, {
+      method: 'POST',
+      body: req,
+    });
+  } catch (error) {
+    console.warn('Using mock recipe after API failure:', error);
+    return generateMockRecipe(req);
+  }
 }
 
 export async function askExpert(question: string): Promise<ExpertAnswer> {
@@ -34,10 +44,15 @@ export async function askExpert(question: string): Promise<ExpertAnswer> {
     return askMockExpert(question);
   }
 
-  return apiRequest<ExpertAnswer>(smokeRadarEndpoints.expert, {
-    method: 'POST',
-    body: { question },
-  });
+  try {
+    return await apiRequest<ExpertAnswer>(smokeRadarEndpoints.expert, {
+      method: 'POST',
+      body: { question },
+    });
+  } catch (error) {
+    console.warn('Using mock expert answer after API failure:', error);
+    return askMockExpert(question);
+  }
 }
 
 export async function findNearbyButchers(): Promise<Butcher[]> {
@@ -45,5 +60,10 @@ export async function findNearbyButchers(): Promise<Butcher[]> {
     return findMockNearbyButchers();
   }
 
-  return apiRequest<Butcher[]>(smokeRadarEndpoints.butchers);
+  try {
+    return await apiRequest<Butcher[]>(smokeRadarEndpoints.butchers);
+  } catch (error) {
+    console.warn('Using mock butchers after API failure:', error);
+    return findMockNearbyButchers();
+  }
 }

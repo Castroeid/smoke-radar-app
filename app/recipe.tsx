@@ -18,10 +18,21 @@ export default function RecipeScreen() {
   const [step, setStep] = useState(1);
   const [method, setMethod] = useState(methods[0]);
   const [effort, setEffort] = useState(efforts[1]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
 
   const generate = async () => {
-    const recipe = await generateRecipe({ cut: selectedCut, method, effort });
-    router.push({ pathname: '/result', params: { source: 'recipe', payload: JSON.stringify(recipe), meat: selectedCut } });
+    setLoading(true);
+    setError('');
+
+    try {
+      const recipe = await generateRecipe({ cut: selectedCut, method, effort });
+      router.push({ pathname: '/result', params: { source: 'recipe', payload: JSON.stringify(recipe), meat: selectedCut } });
+    } catch {
+      setError('לא הצלחנו ליצור מתכון כרגע. נסו שוב בעוד רגע.');
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -68,7 +79,8 @@ export default function RecipeScreen() {
           onSelect={setEffort}
           onBack={() => setStep(2)}
           onNext={generate}
-          nextTitle="חוללו מתכון"
+          nextTitle={loading ? 'מחולל מתכון...' : 'חוללו מתכון'}
+          error={error}
         />
       ) : null}
     </AppScreen>
@@ -83,9 +95,10 @@ type ChoiceStepProps = {
   onBack: () => void;
   onNext: () => void;
   nextTitle?: string;
+  error?: string;
 };
 
-function ChoiceStep({ title, options, value, onSelect, onBack, onNext, nextTitle = 'המשך' }: ChoiceStepProps) {
+function ChoiceStep({ title, options, value, onSelect, onBack, onNext, nextTitle = 'המשך', error }: ChoiceStepProps) {
   return (
     <AppCard>
       <Text style={styles.stepTitle}>{title}</Text>
@@ -100,6 +113,7 @@ function ChoiceStep({ title, options, value, onSelect, onBack, onNext, nextTitle
           );
         })}
       </View>
+      {error ? <Text style={styles.error}>{error}</Text> : null}
       <View style={styles.buttonRow}>
         <AppButton title="חזרה" variant="ghost" onPress={onBack} style={styles.rowButton} />
         <AppButton title={nextTitle} onPress={onNext} style={styles.rowButtonWide} />
@@ -177,6 +191,12 @@ const styles = StyleSheet.create({
   },
   optionTextSelected: {
     color: smokeColors.text,
+  },
+  error: {
+    color: smokeColors.gold,
+    fontSize: 14,
+    lineHeight: 22,
+    ...rtlText,
   },
   buttonRow: {
     flexDirection: 'row-reverse',
