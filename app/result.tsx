@@ -63,11 +63,17 @@ function RecipeView({ recipe }: { recipe: RecipeResult }) {
 }
 
 function ExpertView({ answer }: { answer: ExpertAnswer }) {
+  const paragraphs = cleanExpertText(answer.answer);
+
   return (
     <AppCard elevated>
       <Text style={styles.question}>{answer.question}</Text>
-      <Text style={styles.answer}>{answer.answer}</Text>
-      <ResultSection title="טיפים קצרים" items={answer.tips} numbered />
+      <View style={styles.answerBlock}>
+        {paragraphs.map((paragraph) => (
+          <Text key={paragraph} style={styles.answer}>{paragraph}</Text>
+        ))}
+      </View>
+      <ResultSection title="טיפים קצרים" items={answer.tips.map(cleanInlineText)} numbered />
     </AppCard>
   );
 }
@@ -86,13 +92,36 @@ function ResultSection({ title, items, numbered = false }: { title: string; item
     <View style={styles.section}>
       <Text style={styles.sectionTitle}>{title}</Text>
       {items.map((item, index) => (
-        <View key={item} style={styles.itemRow}>
+        <View key={`${title}-${index}-${item}`} style={styles.itemRow}>
           <Text style={styles.bullet}>{numbered ? index + 1 : '•'}</Text>
-          <Text style={styles.itemText}>{item}</Text>
+          <Text style={styles.itemText}>{cleanInlineText(item)}</Text>
         </View>
       ))}
     </View>
   );
+}
+
+function cleanExpertText(value: string) {
+  const cleaned = value
+    .replace(/^#{1,6}\s*/gm, '')
+    .replace(/\*\*(.*?)\*\*/g, '$1')
+    .replace(/\*(.*?)\*/g, '$1')
+    .replace(/^\s*[-*]\s+/gm, '')
+    .replace(/^\s*\d+\.\s+/gm, '')
+    .replace(/\n{3,}/g, '\n\n')
+    .trim();
+
+  return cleaned.split(/\n{2,}/).map((item) => item.trim()).filter(Boolean);
+}
+
+function cleanInlineText(value: string) {
+  return value
+    .replace(/^#{1,6}\s*/g, '')
+    .replace(/\*\*(.*?)\*\*/g, '$1')
+    .replace(/\*(.*?)\*/g, '$1')
+    .replace(/^\s*[-*]\s+/g, '')
+    .replace(/^\s*\d+\.\s+/g, '')
+    .trim();
 }
 
 const styles = StyleSheet.create({
@@ -166,10 +195,13 @@ const styles = StyleSheet.create({
     padding: 14,
     ...rtlText,
   },
+  answerBlock: {
+    gap: 10,
+  },
   answer: {
     color: smokeColors.text,
     fontSize: 17,
-    lineHeight: 26,
+    lineHeight: 28,
     ...rtlText,
   },
   nextTitle: {

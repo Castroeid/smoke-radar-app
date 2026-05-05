@@ -17,7 +17,7 @@ function cleanBaseUrl(url?: string) {
 export const smokeRadarApiConfig = {
   mode: readEnv('EXPO_PUBLIC_SMOKE_RADAR_API_MODE') === 'real' ? 'real' : 'mock',
   baseUrl: cleanBaseUrl(readEnv('EXPO_PUBLIC_SMOKE_RADAR_API_URL')),
-  timeoutMs: 12000,
+  timeoutMs: 45000,
 } satisfies {
   mode: ApiMode;
   baseUrl: string;

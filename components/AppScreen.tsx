@@ -25,7 +25,6 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: smokeColors.background,
-    direction: 'rtl',
   },
   content: {
     gap: 18,

@@ -4,7 +4,8 @@ import { createOpenAiResponse, hasOpenAiKey } from './openaiClient.js';
 const expertInstructions = `
 אתה מומחה בשר, גריל ומעשנה עבור אפליקציית Smoke Radar.
 ענה בעברית בלבד, בצורה קצרה, מעשית, בטוחה וברורה.
-אל תמציא נתונים רפואיים או בטיחותיים מסוכנים.
+אל תשתמש ב-Markdown: בלי כותרות ##, בלי הדגשות **, בלי טבלאות ובלי רשימות Markdown.
+כתוב 2-4 פסקאות קצרות בטקסט נקי שמתאים לתצוגה באפליקציה.
 אם השאלה לא ברורה, תן תשובה כללית מועילה ושאל שאלה ממקדת בסוף.
 `;
 
@@ -91,7 +92,7 @@ export async function answerExpertWithAi(question) {
 
     return {
       question,
-      answer,
+      answer: cleanMarkdown(answer),
       tips: buildTipsFromAnswer(answer),
     };
   } catch (error) {
@@ -101,8 +102,8 @@ export async function answerExpertWithAi(question) {
 }
 
 function buildTipsFromAnswer(answer) {
-  const sentences = answer
-    .split(/[.!?。]\s|\. |\n/)
+  const sentences = cleanMarkdown(answer)
+    .split(/[.!?]\s|\. |\n/)
     .map((item) => item.trim())
     .filter(Boolean);
 
@@ -115,4 +116,15 @@ function buildTipsFromAnswer(answer) {
     'תנו לנתח לנוח לפני פריסה.',
     'בדקו מרקם וטמפרטורה במקום להסתמך רק על זמן.',
   ];
+}
+
+function cleanMarkdown(value) {
+  return value
+    .replace(/^#{1,6}\s*/gm, '')
+    .replace(/\*\*(.*?)\*\*/g, '$1')
+    .replace(/\*(.*?)\*/g, '$1')
+    .replace(/^\s*[-*]\s+/gm, '')
+    .replace(/^\s*\d+\.\s+/gm, '')
+    .replace(/\n{3,}/g, '\n\n')
+    .trim();
 }
