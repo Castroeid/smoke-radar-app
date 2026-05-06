@@ -1,7 +1,8 @@
 import { DarkTheme, ThemeProvider } from '@react-navigation/native';
 import { Stack } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
-import { I18nManager, StyleSheet, Text } from 'react-native';
+import { useEffect } from 'react';
+import { I18nManager, Platform, StyleSheet, Text } from 'react-native';
 import 'react-native-reanimated';
 
 import { rtlText, smokeColors } from '@/constants/smokeTheme';
@@ -22,6 +23,14 @@ const smokeTheme = {
 };
 
 export default function RootLayout() {
+  useEffect(() => {
+    if (Platform.OS === 'web' && typeof document !== 'undefined') {
+      document.documentElement.dir = 'rtl';
+      document.documentElement.lang = 'he';
+      document.body.dir = 'rtl';
+    }
+  }, []);
+
   return (
     <ThemeProvider value={smokeTheme}>
       <Stack

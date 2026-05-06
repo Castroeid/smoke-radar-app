@@ -6,6 +6,8 @@ import { AppButton } from '@/components/AppButton';
 import { AppCard } from '@/components/AppCard';
 import { AppScreen } from '@/components/AppScreen';
 import { SectionTitle } from '@/components/SectionTitle';
+import { SmokeImage } from '@/components/SmokeImage';
+import { smokeImages } from '@/constants/smokeImages';
 import { rtlText, smokeColors } from '@/constants/smokeTheme';
 import { getTrendingCuts, type RadarCut } from '@/services/smokeRadarService';
 
@@ -29,6 +31,8 @@ export default function RadarScreen() {
   return (
     <AppScreen>
       <SectionTitle title="מה חם עכשיו?" subtitle="בחרו טרנד בשרי אחד והמשיכו למסלול שמתאים לכם." />
+
+      <SmokeImage source={smokeImages.smoker} height={135} />
 
       <View style={styles.signal}>
         <Text style={styles.signalLabel}>רדאר פעיל</Text>

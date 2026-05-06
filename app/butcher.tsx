@@ -1,10 +1,12 @@
 import { useEffect, useState } from 'react';
-import { StyleSheet, Text, View } from 'react-native';
+import { Linking, StyleSheet, Text, View } from 'react-native';
 
 import { AppButton } from '@/components/AppButton';
 import { AppCard } from '@/components/AppCard';
 import { AppScreen } from '@/components/AppScreen';
 import { SectionTitle } from '@/components/SectionTitle';
+import { SmokeImage } from '@/components/SmokeImage';
+import { smokeImages } from '@/constants/smokeImages';
 import { rtlText, smokeColors } from '@/constants/smokeTheme';
 import { findNearbyButchers, type Butcher } from '@/services/smokeRadarService';
 
@@ -20,8 +22,10 @@ export default function ButcherScreen() {
       <SectionTitle
         eyebrow="מציאת קצביות"
         title="קצביות קרובות אליכם"
-        subtitle="תוצאות mock למסך נפרד וברור. כפתור המפה הוא placeholder עד חיבור שירות מיקום."
+        subtitle="תוצאות קרובות לפי Google Places כשיש מפתח פעיל, עם fallback מקומי אם החיבור לא זמין."
       />
+
+      <SmokeImage source={smokeImages.butcher} height={130} />
 
       <View style={styles.list}>
         {items.map((item) => (
@@ -32,7 +36,14 @@ export default function ButcherScreen() {
             </View>
             <Text style={styles.address}>{item.address}</Text>
             <Text style={styles.review}>{item.reviewHighlight}</Text>
-            <AppButton title="פתחו מפה" variant="secondary" onPress={() => {}} />
+            <AppButton
+              title="פתחו מפה"
+              variant="secondary"
+              onPress={() => {
+                const url = item.mapsUrl ?? `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(item.name)}`;
+                Linking.openURL(url);
+              }}
+            />
           </AppCard>
         ))}
       </View>

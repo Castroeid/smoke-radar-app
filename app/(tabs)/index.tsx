@@ -4,6 +4,8 @@ import { StyleSheet, Text, View } from 'react-native';
 import { AppButton } from '@/components/AppButton';
 import { AppCard } from '@/components/AppCard';
 import { AppScreen } from '@/components/AppScreen';
+import { SmokeImage } from '@/components/SmokeImage';
+import { smokeImages } from '@/constants/smokeImages';
 import { rtlText, smokeColors } from '@/constants/smokeTheme';
 
 export default function HomeScreen() {
@@ -11,6 +13,7 @@ export default function HomeScreen() {
     <AppScreen scroll={false} style={styles.screen}>
       <View style={styles.top}>
         <Text style={styles.logo}>SMOKE RADAR</Text>
+        <SmokeImage source={smokeImages.hero} height={150} />
         <View style={styles.radar}>
           <View style={styles.ringLarge}>
             <View style={styles.ringMedium}>

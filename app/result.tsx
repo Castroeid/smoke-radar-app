@@ -7,6 +7,7 @@ import { AppCard } from '@/components/AppCard';
 import { AppScreen } from '@/components/AppScreen';
 import { SectionTitle } from '@/components/SectionTitle';
 import { rtlText, smokeColors } from '@/constants/smokeTheme';
+import { saveRecipe } from '@/services/savedRecipes';
 import type { ExpertAnswer, RecipeResult, RecipeSideDish } from '@/services/smokeRadarTypes';
 
 type ResultSource = 'recipe' | 'expert';
@@ -38,6 +39,7 @@ export default function ResultScreen() {
   };
 
   const parsedPayload = useMemo(() => parsePayload(payload), [payload]);
+  const [saveState, setSaveState] = useState('');
 
   return (
     <AppScreen>
@@ -49,14 +51,60 @@ export default function ResultScreen() {
       <AppCard>
         <Text style={styles.nextTitle}>פעולות המשך</Text>
         {source === 'recipe' ? <AppButton title="המשך למצרכים" onPress={goToShopping} /> : null}
+        {source === 'recipe' && parsedPayload ? (
+          <>
+            <AppButton
+              title={saveState || 'שמרו מתכון'}
+              variant="secondary"
+              onPress={async () => {
+                await saveRecipe(parsedPayload as RecipeResult);
+                setSaveState('המתכון נשמר');
+              }}
+            />
+            <AppButton title="שתפו מתכון מלא" variant="ghost" onPress={() => shareRecipe(parsedPayload as RecipeResult)} />
+          </>
+        ) : null}
         <View style={styles.actionGrid}>
           <AppButton title="נסו שוב" variant="secondary" onPress={tryAgain} style={styles.actionButton} />
           <AppButton title="חזרו לרדאר" onPress={() => router.push('/radar')} style={styles.actionButton} />
         </View>
-        <AppButton title="שתפו" variant="ghost" onPress={shareResult} />
+        {source !== 'recipe' ? <AppButton title="שתפו" variant="ghost" onPress={shareResult} /> : null}
       </AppCard>
     </AppScreen>
   );
+}
+
+async function shareRecipe(recipe: RecipeResult) {
+  await Share.share({ message: formatRecipeForShare(recipe) });
+}
+
+function formatRecipeForShare(recipe: RecipeResult) {
+  const sideDishes = normalizeSideDishes(recipe.sideDishes);
+  const lines = [
+    `Smoke Radar - ${recipe.title}`,
+    `זמן הכנה: ${recipe.prepTime}`,
+    `קושי: ${recipe.difficulty}`,
+    '',
+    'מצרכים:',
+    ...recipe.ingredients.map((item) => `• ${cleanInlineText(item)}`),
+    '',
+    'מדריך שיטת הבישול:',
+    ...getMethodGuide(recipe).map((item, index) => `${index + 1}. ${cleanInlineText(item)}`),
+    '',
+    'שלבי הכנה:',
+    ...recipe.steps.map((item, index) => `${index + 1}. ${cleanInlineText(item)}`),
+    '',
+    'תוספות:',
+    ...sideDishes.flatMap((dish) => [
+      `• ${cleanInlineText(dish.title)} - ${cleanInlineText(dish.description)}`,
+      ...dish.steps.map((step, index) => `  ${index + 1}. ${cleanInlineText(step)}`),
+    ]),
+    '',
+    'רטבים:',
+    ...recipe.sauces.map((item) => `• ${cleanInlineText(item)}`),
+  ];
+
+  return lines.join('\n');
 }
 
 function RecipeView({ recipe }: { recipe: RecipeResult }) {

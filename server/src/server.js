@@ -1,8 +1,9 @@
 import { createServer } from 'node:http';
 
 import { answerExpertWithAi, generateRecipeWithAi } from './aiService.js';
-import { butchers, trendingCuts } from './mockData.js';
+import { trendingCuts } from './mockData.js';
 import { readJson, sendJson, sendOptions } from './http.js';
+import { findButchersWithPlaces } from './placesService.js';
 
 export async function route(req, res) {
   const url = new URL(req.url ?? '/', `http://${req.headers.host ?? 'localhost'}`);
@@ -35,7 +36,7 @@ export async function route(req, res) {
   }
 
   if (req.method === 'GET' && url.pathname === '/butchers/nearby') {
-    sendJson(res, 200, butchers);
+    sendJson(res, 200, await findButchersWithPlaces({ lat: url.searchParams.get('lat'), lng: url.searchParams.get('lng') }));
     return;
   }
 

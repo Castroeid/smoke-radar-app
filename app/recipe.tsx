@@ -6,11 +6,14 @@ import { AppButton } from '@/components/AppButton';
 import { AppCard } from '@/components/AppCard';
 import { AppScreen } from '@/components/AppScreen';
 import { SectionTitle } from '@/components/SectionTitle';
+import { SmokeImage } from '@/components/SmokeImage';
+import { smokeImages } from '@/constants/smokeImages';
 import { rtlText, smokeColors } from '@/constants/smokeTheme';
 import { generateRecipe } from '@/services/smokeRadarService';
 
-const methods = ['מעשנה', 'גריל פחמים', 'תנור ביתי'];
+const methods = ['מעשנה', 'מנגל ישראלי', 'גריל פחמים', 'סיר קדירה', 'תנור ביתי', 'פלנצ׳ה', 'בישול ארוך בתנור'];
 const efforts = ['מהיר', 'מאוזן', 'מושקע'];
+const kosherOptions = ['כשר', 'לא כשר'];
 
 export default function RecipeScreen() {
   const { meat } = useLocalSearchParams<{ meat?: string }>();
@@ -18,6 +21,7 @@ export default function RecipeScreen() {
   const [step, setStep] = useState(1);
   const [method, setMethod] = useState(methods[0]);
   const [effort, setEffort] = useState(efforts[1]);
+  const [kosherPreference, setKosherPreference] = useState(kosherOptions[0]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
@@ -26,7 +30,7 @@ export default function RecipeScreen() {
     setError('');
 
     try {
-      const recipe = await generateRecipe({ cut: selectedCut, method, effort });
+      const recipe = await generateRecipe({ cut: selectedCut, method, effort, kosherPreference });
       router.push({ pathname: '/result', params: { source: 'recipe', payload: JSON.stringify(recipe), meat: selectedCut } });
     } catch {
       setError('לא הצלחנו ליצור מתכון כרגע. נסו שוב בעוד רגע.');
@@ -43,8 +47,10 @@ export default function RecipeScreen() {
         subtitle={`הנתח שנבחר: ${selectedCut}`}
       />
 
+      <SmokeImage source={smokeImages.fire} height={130} />
+
       <View style={styles.progress}>
-        {[1, 2, 3].map((item) => (
+        {[1, 2, 3, 4].map((item) => (
           <View key={item} style={[styles.dot, item <= step && styles.dotActive]}>
             <Text style={[styles.dotText, item <= step && styles.dotTextActive]}>{item}</Text>
           </View>
@@ -73,11 +79,22 @@ export default function RecipeScreen() {
 
       {step === 3 ? (
         <ChoiceStep
-          title="3. זמן ורמת השקעה"
+          title="3. כשרות"
+          options={kosherOptions}
+          value={kosherPreference}
+          onSelect={setKosherPreference}
+          onBack={() => setStep(2)}
+          onNext={() => setStep(4)}
+        />
+      ) : null}
+
+      {step === 4 ? (
+        <ChoiceStep
+          title="4. זמן ורמת השקעה"
           options={efforts}
           value={effort}
           onSelect={setEffort}
-          onBack={() => setStep(2)}
+          onBack={() => setStep(3)}
           onNext={generate}
           nextTitle={loading ? 'מחולל מתכון...' : 'חוללו מתכון'}
           error={error}

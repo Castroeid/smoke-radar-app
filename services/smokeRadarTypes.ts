@@ -10,6 +10,7 @@ export type RecipeRequest = {
   cut: string;
   method: string;
   effort: string;
+  kosherPreference: string;
 };
 
 export type RecipeSideDish = {
@@ -41,4 +42,5 @@ export type Butcher = {
   rating: string;
   address: string;
   reviewHighlight: string;
+  mapsUrl?: string;
 };

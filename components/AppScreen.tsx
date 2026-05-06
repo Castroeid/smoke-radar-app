@@ -27,6 +27,7 @@ const styles = StyleSheet.create({
     backgroundColor: smokeColors.background,
   },
   content: {
+    alignItems: 'stretch',
     gap: 18,
     padding: screenPadding,
   },
