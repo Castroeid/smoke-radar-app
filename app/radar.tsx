@@ -76,15 +76,19 @@ const styles = StyleSheet.create({
     padding: 18,
   },
   signalLabel: {
+    flex: 1,
     color: smokeColors.muted,
     fontSize: 16,
     fontWeight: '800',
     ...rtlText,
   },
   signalValue: {
+    flexShrink: 0,
+    minWidth: 92,
     color: smokeColors.orange,
-    fontSize: 38,
+    fontSize: 34,
     fontWeight: '900',
+    textAlign: 'left',
   },
   list: {
     gap: 12,
@@ -106,6 +110,7 @@ const styles = StyleSheet.create({
     ...rtlText,
   },
   score: {
+    flexShrink: 0,
     overflow: 'hidden',
     borderRadius: 999,
     backgroundColor: '#2B140E',

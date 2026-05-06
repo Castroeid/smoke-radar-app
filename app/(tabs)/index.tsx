@@ -6,7 +6,7 @@ import { AppCard } from '@/components/AppCard';
 import { AppScreen } from '@/components/AppScreen';
 import { SmokeImage } from '@/components/SmokeImage';
 import { smokeImages } from '@/constants/smokeImages';
-import { rtlText, smokeColors } from '@/constants/smokeTheme';
+import { rtlBlockText, rtlText, smokeColors } from '@/constants/smokeTheme';
 
 export default function HomeScreen() {
   return (
@@ -93,6 +93,7 @@ const styles = StyleSheet.create({
     ...rtlText,
   },
   copy: {
+    alignItems: 'stretch',
     gap: 10,
   },
   title: {
@@ -100,13 +101,13 @@ const styles = StyleSheet.create({
     fontSize: 36,
     fontWeight: '900',
     lineHeight: 43,
-    ...rtlText,
+    ...rtlBlockText,
   },
   subtitle: {
     color: smokeColors.orange,
     fontSize: 20,
     fontWeight: '900',
-    ...rtlText,
+    ...rtlBlockText,
   },
   startCard: {
     marginBottom: 6,
@@ -115,6 +116,6 @@ const styles = StyleSheet.create({
     color: smokeColors.muted,
     fontSize: 16,
     lineHeight: 25,
-    ...rtlText,
+    ...rtlBlockText,
   },
 });

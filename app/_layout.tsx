@@ -2,10 +2,10 @@ import { DarkTheme, ThemeProvider } from '@react-navigation/native';
 import { Stack } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import { useEffect } from 'react';
-import { Platform, StyleSheet, Text } from 'react-native';
+import { Platform, Pressable, StyleSheet, Text, View } from 'react-native';
 import 'react-native-reanimated';
 
-import { rtlText, rtlView, smokeColors } from '@/constants/smokeTheme';
+import { rtlRow, rtlText, rtlView, smokeColors } from '@/constants/smokeTheme';
 
 const smokeTheme = {
   ...DarkTheme,
@@ -32,12 +32,14 @@ export default function RootLayout() {
     <ThemeProvider value={smokeTheme}>
       <Stack
         screenOptions={{
-          headerStyle: { backgroundColor: smokeColors.background },
-          headerTintColor: smokeColors.text,
-          headerShadowVisible: false,
           contentStyle: { backgroundColor: smokeColors.background, ...rtlView },
-          headerTitleAlign: 'left',
-          headerTitle: ({ children }) => <Text style={styles.headerTitle}>{children}</Text>,
+          header: ({ options, route, navigation, back }) => (
+            <RtlHeader
+              title={String(options.title ?? route.name)}
+              canGoBack={Boolean(back)}
+              onBack={() => navigation.goBack()}
+            />
+          ),
         }}>
         <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
         <Stack.Screen name="radar" options={{ title: 'רדאר הבשרים' }} />
@@ -54,12 +56,51 @@ export default function RootLayout() {
   );
 }
 
+function RtlHeader({ title, canGoBack, onBack }: { title: string; canGoBack: boolean; onBack: () => void }) {
+  return (
+    <View style={styles.header}>
+      <Text style={styles.headerTitle}>{title}</Text>
+      {canGoBack ? (
+        <Pressable style={styles.backButton} onPress={onBack}>
+          <Text style={styles.backText}>{'<'}</Text>
+        </Pressable>
+      ) : (
+        <View style={styles.backButton} />
+      )}
+    </View>
+  );
+}
+
 const styles = StyleSheet.create({
+  header: {
+    ...rtlRow,
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    borderBottomWidth: 1,
+    borderBottomColor: '#120B08',
+    backgroundColor: smokeColors.background,
+    paddingTop: 50,
+    paddingHorizontal: 18,
+    paddingBottom: 12,
+  },
   headerTitle: {
-    width: 260,
+    flex: 1,
     color: smokeColors.text,
     fontSize: 18,
     fontWeight: '800',
     ...rtlText,
+  },
+  backButton: {
+    width: 44,
+    height: 44,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  backText: {
+    color: smokeColors.text,
+    fontSize: 36,
+    fontWeight: '300',
+    lineHeight: 38,
+    textAlign: 'center',
   },
 });

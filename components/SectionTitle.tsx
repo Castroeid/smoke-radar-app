@@ -1,6 +1,6 @@
 import { StyleSheet, Text, View } from 'react-native';
 
-import { rtlText, rtlView, smokeColors } from '@/constants/smokeTheme';
+import { rtlBlockText, rtlView, smokeColors } from '@/constants/smokeTheme';
 
 type SectionTitleProps = {
   eyebrow?: string;
@@ -27,19 +27,19 @@ const styles = StyleSheet.create({
     color: smokeColors.orange,
     fontSize: 13,
     fontWeight: '900',
-    ...rtlText,
+    ...rtlBlockText,
   },
   title: {
     color: smokeColors.text,
     fontSize: 32,
     fontWeight: '900',
     lineHeight: 39,
-    ...rtlText,
+    ...rtlBlockText,
   },
   subtitle: {
     color: smokeColors.muted,
     fontSize: 16,
     lineHeight: 25,
-    ...rtlText,
+    ...rtlBlockText,
   },
 });

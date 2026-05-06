@@ -1,4 +1,4 @@
-import { I18nManager, Platform, type ViewStyle } from 'react-native';
+import { I18nManager, Platform, type TextStyle, type ViewStyle } from 'react-native';
 
 void I18nManager.allowRTL(true);
 void I18nManager.forceRTL(true);
@@ -19,9 +19,15 @@ export const smokeColors = {
 };
 
 export const rtlText = {
+  alignSelf: 'stretch' as const,
   textAlign: 'right' as const,
   writingDirection: 'rtl' as const,
-};
+} satisfies TextStyle;
+
+export const rtlBlockText = {
+  ...rtlText,
+  width: '100%' as const,
+} satisfies TextStyle;
 
 export const rtlView = (Platform.OS === 'web'
   ? {}
