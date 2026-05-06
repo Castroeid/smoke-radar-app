@@ -8,7 +8,7 @@ import { AppScreen } from '@/components/AppScreen';
 import { SectionTitle } from '@/components/SectionTitle';
 import { SmokeImage } from '@/components/SmokeImage';
 import { smokeImages } from '@/constants/smokeImages';
-import { rtlText, smokeColors } from '@/constants/smokeTheme';
+import { rtlRow, rtlText, smokeColors } from '@/constants/smokeTheme';
 import { getTrendingCuts, type RadarCut } from '@/services/smokeRadarService';
 
 export default function RadarScreen() {
@@ -66,7 +66,7 @@ export default function RadarScreen() {
 const styles = StyleSheet.create({
   signal: {
     minHeight: 88,
-    flexDirection: 'row',
+    ...rtlRow,
     alignItems: 'center',
     justifyContent: 'space-between',
     borderRadius: 22,
@@ -93,7 +93,7 @@ const styles = StyleSheet.create({
     minHeight: 130,
   },
   cardTop: {
-    flexDirection: 'row',
+    ...rtlRow,
     alignItems: 'center',
     justifyContent: 'space-between',
     gap: 12,

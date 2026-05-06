@@ -36,7 +36,7 @@ export const rtlContent = {
 
 export const rtlRow = {
   ...rtlView,
-  flexDirection: 'row' as const,
+  flexDirection: 'row-reverse' as const,
 };
 
 export const screenPadding = 20;

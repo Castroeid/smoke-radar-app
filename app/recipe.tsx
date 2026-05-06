@@ -8,7 +8,7 @@ import { AppScreen } from '@/components/AppScreen';
 import { SectionTitle } from '@/components/SectionTitle';
 import { SmokeImage } from '@/components/SmokeImage';
 import { smokeImages } from '@/constants/smokeImages';
-import { rtlText, smokeColors } from '@/constants/smokeTheme';
+import { rtlRow, rtlText, smokeColors } from '@/constants/smokeTheme';
 import { generateRecipe } from '@/services/smokeRadarService';
 
 const methods = ['מעשנה', 'מנגל ישראלי', 'גריל פחמים', 'סיר קדירה', 'תנור ביתי', 'פלנצ׳ה', 'בישול ארוך בתנור'];
@@ -141,7 +141,7 @@ function ChoiceStep({ title, options, value, onSelect, onBack, onNext, nextTitle
 
 const styles = StyleSheet.create({
   progress: {
-    flexDirection: 'row',
+    ...rtlRow,
     gap: 10,
   },
   dot: {
@@ -216,7 +216,7 @@ const styles = StyleSheet.create({
     ...rtlText,
   },
   buttonRow: {
-    flexDirection: 'row',
+    ...rtlRow,
     gap: 10,
   },
   rowButton: {

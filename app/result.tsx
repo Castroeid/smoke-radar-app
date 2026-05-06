@@ -6,7 +6,7 @@ import { AppButton } from '@/components/AppButton';
 import { AppCard } from '@/components/AppCard';
 import { AppScreen } from '@/components/AppScreen';
 import { SectionTitle } from '@/components/SectionTitle';
-import { rtlText, smokeColors } from '@/constants/smokeTheme';
+import { rtlRow, rtlText, smokeColors } from '@/constants/smokeTheme';
 import { saveRecipe } from '@/services/savedRecipes';
 import type { ExpertAnswer, RecipeResult, RecipeSideDish } from '@/services/smokeRadarTypes';
 
@@ -280,7 +280,7 @@ const styles = StyleSheet.create({
     ...rtlText,
   },
   metaRow: {
-    flexDirection: 'row',
+    ...rtlRow,
     gap: 10,
   },
   metaBox: {
@@ -319,7 +319,7 @@ const styles = StyleSheet.create({
     fontSize: 15,
   },
   itemRow: {
-    flexDirection: 'row',
+    ...rtlRow,
     gap: 10,
     borderRadius: 14,
     backgroundColor: '#120B08',
@@ -355,7 +355,7 @@ const styles = StyleSheet.create({
     borderColor: smokeColors.orange,
   },
   sideHeader: {
-    flexDirection: 'row',
+    ...rtlRow,
     alignItems: 'center',
     gap: 10,
   },
@@ -404,7 +404,7 @@ const styles = StyleSheet.create({
     ...rtlText,
   },
   actionGrid: {
-    flexDirection: 'row',
+    ...rtlRow,
     gap: 10,
   },
   actionButton: {

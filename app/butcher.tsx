@@ -7,7 +7,7 @@ import { AppScreen } from '@/components/AppScreen';
 import { SectionTitle } from '@/components/SectionTitle';
 import { SmokeImage } from '@/components/SmokeImage';
 import { smokeImages } from '@/constants/smokeImages';
-import { rtlText, smokeColors } from '@/constants/smokeTheme';
+import { rtlRow, rtlText, smokeColors } from '@/constants/smokeTheme';
 import { findNearbyButchers, type Butcher } from '@/services/smokeRadarService';
 
 export default function ButcherScreen() {
@@ -56,7 +56,7 @@ const styles = StyleSheet.create({
     gap: 12,
   },
   topRow: {
-    flexDirection: 'row',
+    ...rtlRow,
     alignItems: 'center',
     justifyContent: 'space-between',
     gap: 12,

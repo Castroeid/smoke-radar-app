@@ -6,7 +6,7 @@ import { AppButton } from '@/components/AppButton';
 import { AppCard } from '@/components/AppCard';
 import { AppScreen } from '@/components/AppScreen';
 import { SectionTitle } from '@/components/SectionTitle';
-import { rtlText, smokeColors } from '@/constants/smokeTheme';
+import { rtlRow, rtlText, smokeColors } from '@/constants/smokeTheme';
 import type { RecipeResult, RecipeSideDish } from '@/services/smokeRadarTypes';
 
 export default function ShoppingScreen() {
@@ -113,7 +113,7 @@ const styles = StyleSheet.create({
   },
   itemRow: {
     minHeight: 48,
-    flexDirection: 'row',
+    ...rtlRow,
     alignItems: 'center',
     gap: 10,
     borderRadius: 14,

@@ -6,7 +6,7 @@ import { AppButton } from '@/components/AppButton';
 import { AppCard } from '@/components/AppCard';
 import { AppScreen } from '@/components/AppScreen';
 import { SectionTitle } from '@/components/SectionTitle';
-import { rtlText, smokeColors } from '@/constants/smokeTheme';
+import { rtlRow, rtlText, smokeColors } from '@/constants/smokeTheme';
 import { askExpert } from '@/services/smokeRadarService';
 
 export default function ExpertScreen() {
@@ -83,7 +83,7 @@ const styles = StyleSheet.create({
     writingDirection: 'rtl',
   },
   context: {
-    flexDirection: 'row',
+    ...rtlRow,
     justifyContent: 'space-between',
     borderRadius: 16,
     backgroundColor: '#120B08',
