@@ -1,7 +1,7 @@
 import { type ReactNode } from 'react';
 import { StyleSheet, View, type ViewStyle } from 'react-native';
 
-import { smokeColors } from '@/constants/smokeTheme';
+import { rtlView, smokeColors } from '@/constants/smokeTheme';
 
 type AppCardProps = {
   children: ReactNode;
@@ -15,6 +15,7 @@ export function AppCard({ children, style, elevated = false }: AppCardProps) {
 
 const styles = StyleSheet.create({
   card: {
+    ...rtlView,
     gap: 12,
     borderRadius: 22,
     borderWidth: 1,

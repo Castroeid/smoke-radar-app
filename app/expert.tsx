@@ -83,7 +83,7 @@ const styles = StyleSheet.create({
     writingDirection: 'rtl',
   },
   context: {
-    flexDirection: 'row-reverse',
+    flexDirection: 'row',
     justifyContent: 'space-between',
     borderRadius: 16,
     backgroundColor: '#120B08',

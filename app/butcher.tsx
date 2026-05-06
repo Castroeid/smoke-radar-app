@@ -31,8 +31,8 @@ export default function ButcherScreen() {
         {items.map((item) => (
           <AppCard key={item.id}>
             <View style={styles.topRow}>
-              <Text style={styles.rating}>★ {item.rating}</Text>
               <Text style={styles.name}>{item.name}</Text>
+              <Text style={styles.rating}>★ {item.rating}</Text>
             </View>
             <Text style={styles.address}>{item.address}</Text>
             <Text style={styles.review}>{item.reviewHighlight}</Text>
@@ -56,7 +56,7 @@ const styles = StyleSheet.create({
     gap: 12,
   },
   topRow: {
-    flexDirection: 'row-reverse',
+    flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
     gap: 12,

@@ -143,8 +143,8 @@ function SideDishSection({ sideDishes }: { sideDishes: RecipeSideDish[] }) {
             style={[styles.sideCard, isOpen && styles.sideCardOpen]}
             onPress={() => setOpenIndex(isOpen ? -1 : index)}>
             <View style={styles.sideHeader}>
-              <Text style={styles.chevron}>{isOpen ? '−' : '+'}</Text>
               <Text style={styles.sideTitle}>{cleanInlineText(dish.title)}</Text>
+              <Text style={styles.chevron}>{isOpen ? '−' : '+'}</Text>
             </View>
             <Text style={styles.sideDescription}>{cleanInlineText(dish.description)}</Text>
             {isOpen ? <ResultSection title="איך מכינים" items={dish.steps} numbered compact /> : null}
@@ -280,7 +280,7 @@ const styles = StyleSheet.create({
     ...rtlText,
   },
   metaRow: {
-    flexDirection: 'row-reverse',
+    flexDirection: 'row',
     gap: 10,
   },
   metaBox: {
@@ -319,7 +319,7 @@ const styles = StyleSheet.create({
     fontSize: 15,
   },
   itemRow: {
-    flexDirection: 'row-reverse',
+    flexDirection: 'row',
     gap: 10,
     borderRadius: 14,
     backgroundColor: '#120B08',
@@ -355,7 +355,7 @@ const styles = StyleSheet.create({
     borderColor: smokeColors.orange,
   },
   sideHeader: {
-    flexDirection: 'row-reverse',
+    flexDirection: 'row',
     alignItems: 'center',
     gap: 10,
   },
@@ -404,7 +404,7 @@ const styles = StyleSheet.create({
     ...rtlText,
   },
   actionGrid: {
-    flexDirection: 'row-reverse',
+    flexDirection: 'row',
     gap: 10,
   },
   actionButton: {

@@ -141,7 +141,7 @@ function ChoiceStep({ title, options, value, onSelect, onBack, onNext, nextTitle
 
 const styles = StyleSheet.create({
   progress: {
-    flexDirection: 'row-reverse',
+    flexDirection: 'row',
     gap: 10,
   },
   dot: {
@@ -216,7 +216,7 @@ const styles = StyleSheet.create({
     ...rtlText,
   },
   buttonRow: {
-    flexDirection: 'row-reverse',
+    flexDirection: 'row',
     gap: 10,
   },
   rowButton: {

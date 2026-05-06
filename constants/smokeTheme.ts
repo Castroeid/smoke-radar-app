@@ -1,3 +1,9 @@
+import { I18nManager, Platform, type ViewStyle } from 'react-native';
+
+void I18nManager.allowRTL(true);
+void I18nManager.forceRTL(true);
+void I18nManager.swapLeftAndRightInRTL(true);
+
 export const smokeColors = {
   background: '#080605',
   surface: '#14100E',
@@ -15,6 +21,22 @@ export const smokeColors = {
 export const rtlText = {
   textAlign: 'right' as const,
   writingDirection: 'rtl' as const,
+};
+
+export const rtlView = (Platform.OS === 'web'
+  ? {}
+  : {
+      direction: 'rtl',
+    }) as ViewStyle;
+
+export const rtlContent = {
+  ...rtlView,
+  alignItems: 'stretch' as const,
+};
+
+export const rtlRow = {
+  ...rtlView,
+  flexDirection: 'row' as const,
 };
 
 export const screenPadding = 20;

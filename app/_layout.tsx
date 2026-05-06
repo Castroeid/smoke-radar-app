@@ -2,13 +2,10 @@ import { DarkTheme, ThemeProvider } from '@react-navigation/native';
 import { Stack } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import { useEffect } from 'react';
-import { I18nManager, Platform, StyleSheet, Text } from 'react-native';
+import { Platform, StyleSheet, Text } from 'react-native';
 import 'react-native-reanimated';
 
-import { rtlText, smokeColors } from '@/constants/smokeTheme';
-
-void I18nManager.allowRTL(true);
-void I18nManager.forceRTL(true);
+import { rtlText, rtlView, smokeColors } from '@/constants/smokeTheme';
 
 const smokeTheme = {
   ...DarkTheme,
@@ -38,7 +35,7 @@ export default function RootLayout() {
           headerStyle: { backgroundColor: smokeColors.background },
           headerTintColor: smokeColors.text,
           headerShadowVisible: false,
-          contentStyle: { backgroundColor: smokeColors.background },
+          contentStyle: { backgroundColor: smokeColors.background, ...rtlView },
           headerTitleAlign: 'left',
           headerTitle: ({ children }) => <Text style={styles.headerTitle}>{children}</Text>,
         }}>
@@ -59,7 +56,7 @@ export default function RootLayout() {
 
 const styles = StyleSheet.create({
   headerTitle: {
-    minWidth: 220,
+    width: 260,
     color: smokeColors.text,
     fontSize: 18,
     fontWeight: '800',

@@ -1,7 +1,7 @@
 import { type ReactNode } from 'react';
 import { Pressable, StyleSheet, Text, type ViewStyle } from 'react-native';
 
-import { rtlText, smokeColors } from '@/constants/smokeTheme';
+import { rtlRow, rtlText, smokeColors } from '@/constants/smokeTheme';
 
 type AppButtonProps = {
   title: string;
@@ -22,8 +22,8 @@ export function AppButton({ title, onPress, variant = 'primary', style, icon }: 
 
 const styles = StyleSheet.create({
   button: {
+    ...rtlRow,
     minHeight: 58,
-    flexDirection: 'row-reverse',
     alignItems: 'center',
     justifyContent: 'center',
     gap: 8,

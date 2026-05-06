@@ -1,6 +1,6 @@
 import { StyleSheet, Text, View } from 'react-native';
 
-import { rtlText, smokeColors } from '@/constants/smokeTheme';
+import { rtlText, rtlView, smokeColors } from '@/constants/smokeTheme';
 
 type SectionTitleProps = {
   eyebrow?: string;
@@ -20,6 +20,7 @@ export function SectionTitle({ eyebrow, title, subtitle }: SectionTitleProps) {
 
 const styles = StyleSheet.create({
   container: {
+    ...rtlView,
     gap: 8,
   },
   eyebrow: {

@@ -1,7 +1,7 @@
 import { type ReactNode } from 'react';
 import { ScrollView, StyleSheet, View, type ViewStyle } from 'react-native';
 
-import { screenPadding, smokeColors } from '@/constants/smokeTheme';
+import { rtlContent, rtlView, screenPadding, smokeColors } from '@/constants/smokeTheme';
 
 type AppScreenProps = {
   children: ReactNode;
@@ -25,9 +25,10 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: smokeColors.background,
+    ...rtlView,
   },
   content: {
-    alignItems: 'stretch',
+    ...rtlContent,
     gap: 18,
     padding: screenPadding,
   },

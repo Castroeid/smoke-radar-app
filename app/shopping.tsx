@@ -113,7 +113,7 @@ const styles = StyleSheet.create({
   },
   itemRow: {
     minHeight: 48,
-    flexDirection: 'row-reverse',
+    flexDirection: 'row',
     alignItems: 'center',
     gap: 10,
     borderRadius: 14,

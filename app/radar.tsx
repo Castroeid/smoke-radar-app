@@ -47,8 +47,8 @@ export default function RadarScreen() {
             <Pressable key={item.id} onPress={() => setSelectedCut(item)}>
               <AppCard elevated={selected} style={styles.card}>
                 <View style={styles.cardTop}>
-                  <Text style={styles.score}>{item.heatScore}</Text>
                   <Text style={styles.cardTitle}>{item.title}</Text>
+                  <Text style={styles.score}>{item.heatScore}</Text>
                 </View>
                 <Text style={styles.description}>{item.description}</Text>
                 <Text style={styles.momentum}>מומנטום {item.momentum}</Text>
@@ -66,7 +66,7 @@ export default function RadarScreen() {
 const styles = StyleSheet.create({
   signal: {
     minHeight: 88,
-    flexDirection: 'row-reverse',
+    flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
     borderRadius: 22,
@@ -93,7 +93,7 @@ const styles = StyleSheet.create({
     minHeight: 130,
   },
   cardTop: {
-    flexDirection: 'row-reverse',
+    flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
     gap: 12,
