@@ -19,7 +19,6 @@ export const smokeColors = {
 };
 
 export const rtlText = {
-  alignSelf: 'stretch' as const,
   textAlign: 'right' as const,
   writingDirection: 'rtl' as const,
 } satisfies TextStyle;
@@ -27,6 +26,17 @@ export const rtlText = {
 export const rtlBlockText = {
   ...rtlText,
   width: '100%' as const,
+} satisfies TextStyle;
+
+export const centerText = {
+  textAlign: 'center' as const,
+  writingDirection: 'rtl' as const,
+} satisfies TextStyle;
+
+export const centerBlockText = {
+  ...centerText,
+  width: '100%' as const,
+  alignSelf: 'stretch' as const,
 } satisfies TextStyle;
 
 export const rtlView = (Platform.OS === 'web'

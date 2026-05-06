@@ -8,7 +8,7 @@ import { AppScreen } from '@/components/AppScreen';
 import { SectionTitle } from '@/components/SectionTitle';
 import { SmokeImage } from '@/components/SmokeImage';
 import { smokeImages } from '@/constants/smokeImages';
-import { rtlRow, rtlText, smokeColors } from '@/constants/smokeTheme';
+import { centerBlockText, centerText, smokeColors } from '@/constants/smokeTheme';
 import { getTrendingCuts, type RadarCut } from '@/services/smokeRadarService';
 
 export default function RadarScreen() {
@@ -35,8 +35,8 @@ export default function RadarScreen() {
       <SmokeImage source={smokeImages.smoker} height={135} />
 
       <View style={styles.signal}>
-        <Text style={styles.signalLabel}>רדאר פעיל</Text>
         <Text style={styles.signalValue}>{selectedCut?.momentum ?? '--'}</Text>
+        <Text style={styles.signalLabel}>רדאר פעיל</Text>
       </View>
 
       <View style={styles.list}>
@@ -47,8 +47,8 @@ export default function RadarScreen() {
             <Pressable key={item.id} onPress={() => setSelectedCut(item)}>
               <AppCard elevated={selected} style={styles.card}>
                 <View style={styles.cardTop}>
-                  <Text style={styles.cardTitle}>{item.title}</Text>
                   <Text style={styles.score}>{item.heatScore}</Text>
+                  <Text style={styles.cardTitle}>{item.title}</Text>
                 </View>
                 <Text style={styles.description}>{item.description}</Text>
                 <Text style={styles.momentum}>מומנטום {item.momentum}</Text>
@@ -65,10 +65,10 @@ export default function RadarScreen() {
 
 const styles = StyleSheet.create({
   signal: {
-    minHeight: 88,
-    ...rtlRow,
+    minHeight: 118,
     alignItems: 'center',
-    justifyContent: 'space-between',
+    justifyContent: 'center',
+    gap: 6,
     borderRadius: 22,
     borderWidth: 1,
     borderColor: smokeColors.border,
@@ -76,41 +76,37 @@ const styles = StyleSheet.create({
     padding: 18,
   },
   signalLabel: {
-    flex: 1,
     color: smokeColors.muted,
     fontSize: 16,
     fontWeight: '800',
-    ...rtlText,
+    ...centerText,
   },
   signalValue: {
-    flexShrink: 0,
-    minWidth: 92,
     color: smokeColors.orange,
-    fontSize: 34,
+    fontSize: 42,
     fontWeight: '900',
-    textAlign: 'left',
+    lineHeight: 48,
+    ...centerText,
   },
   list: {
     gap: 12,
   },
   card: {
-    minHeight: 130,
+    minHeight: 158,
+    alignItems: 'center',
   },
   cardTop: {
-    ...rtlRow,
     alignItems: 'center',
-    justifyContent: 'space-between',
-    gap: 12,
+    justifyContent: 'center',
+    gap: 10,
   },
   cardTitle: {
-    flex: 1,
     color: smokeColors.text,
     fontSize: 23,
     fontWeight: '900',
-    ...rtlText,
+    ...centerBlockText,
   },
   score: {
-    flexShrink: 0,
     overflow: 'hidden',
     borderRadius: 999,
     backgroundColor: '#2B140E',
@@ -119,18 +115,18 @@ const styles = StyleSheet.create({
     fontWeight: '900',
     paddingHorizontal: 10,
     paddingVertical: 7,
-    ...rtlText,
+    ...centerText,
   },
   description: {
     color: smokeColors.muted,
     fontSize: 15,
     lineHeight: 23,
-    ...rtlText,
+    ...centerBlockText,
   },
   momentum: {
     color: smokeColors.orange,
     fontSize: 14,
     fontWeight: '900',
-    ...rtlText,
+    ...centerBlockText,
   },
 });

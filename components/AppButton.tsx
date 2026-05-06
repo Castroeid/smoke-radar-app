@@ -1,7 +1,7 @@
 import { type ReactNode } from 'react';
 import { Pressable, StyleSheet, Text, type ViewStyle } from 'react-native';
 
-import { rtlRow, rtlText, smokeColors } from '@/constants/smokeTheme';
+import { centerText, rtlRow, smokeColors } from '@/constants/smokeTheme';
 
 type AppButtonProps = {
   title: string;
@@ -46,7 +46,7 @@ const styles = StyleSheet.create({
   text: {
     fontSize: 18,
     fontWeight: '900',
-    ...rtlText,
+    ...centerText,
   },
   primaryText: {
     color: smokeColors.black,
