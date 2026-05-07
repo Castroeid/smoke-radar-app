@@ -5,7 +5,9 @@ import { AppButton } from '@/components/AppButton';
 import { AppCard } from '@/components/AppCard';
 import { AppScreen } from '@/components/AppScreen';
 import { SectionTitle } from '@/components/SectionTitle';
-import { rtlText, smokeColors } from '@/constants/smokeTheme';
+import { SmokeImage } from '@/components/SmokeImage';
+import { smokeImages } from '@/constants/smokeImages';
+import { centerBlockText, smokeColors } from '@/constants/smokeTheme';
 
 export default function SelectionScreen() {
   const { meat } = useLocalSearchParams<{ meat?: string }>();
@@ -14,6 +16,8 @@ export default function SelectionScreen() {
   return (
     <AppScreen scroll={false} style={styles.screen}>
       <SectionTitle title="מה תרצו לעשות?" subtitle={`בחרתם: ${selectedCut}`} />
+
+      <SmokeImage source={smokeImages.fire} height={120} />
 
       <AppCard style={styles.cutCard}>
         <Text style={styles.cutLabel}>המסלול הבא שלכם</Text>
@@ -49,13 +53,14 @@ const styles = StyleSheet.create({
     color: smokeColors.muted,
     fontSize: 14,
     fontWeight: '800',
-    ...rtlText,
+    ...centerBlockText,
   },
   cutTitle: {
     color: smokeColors.text,
-    fontSize: 34,
+    fontSize: 30,
     fontWeight: '900',
-    ...rtlText,
+    lineHeight: 36,
+    ...centerBlockText,
   },
   actions: {
     gap: 12,

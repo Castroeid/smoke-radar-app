@@ -62,6 +62,7 @@ export default function ResultScreen() {
               }}
             />
             <AppButton title="שתפו מתכון מלא" variant="ghost" onPress={() => shareRecipe(parsedPayload as RecipeResult)} />
+            <AppButton title="המתכונים שלי" variant="ghost" onPress={() => router.push('/my-recipes' as never)} />
           </>
         ) : null}
         <View style={styles.actionGrid}>

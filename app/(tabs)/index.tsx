@@ -1,5 +1,6 @@
 import { router } from 'expo-router';
-import { StyleSheet, Text, View } from 'react-native';
+import { useEffect, useRef } from 'react';
+import { Animated, StyleSheet, Text, View } from 'react-native';
 
 import { AppButton } from '@/components/AppButton';
 import { AppCard } from '@/components/AppCard';
@@ -9,8 +10,22 @@ import { smokeImages } from '@/constants/smokeImages';
 import { centerBlockText, centerText, smokeColors } from '@/constants/smokeTheme';
 
 export default function HomeScreen() {
+  const intro = useRef(new Animated.Value(0)).current;
+
+  useEffect(() => {
+    Animated.timing(intro, { toValue: 1, duration: 700, useNativeDriver: true }).start();
+  }, [intro]);
+
   return (
     <AppScreen scroll={false} style={styles.screen}>
+      <Animated.View
+        style={[
+          styles.intro,
+          {
+            opacity: intro,
+            transform: [{ scale: intro.interpolate({ inputRange: [0, 1], outputRange: [0.96, 1] }) }],
+          },
+        ]}>
       <View style={styles.top}>
         <Text style={styles.logo}>SMOKE RADAR</Text>
         <SmokeImage source={smokeImages.hero} height={150} />
@@ -33,7 +48,9 @@ export default function HomeScreen() {
       <AppCard style={styles.startCard}>
         <Text style={styles.cardText}>סרקו טרנדים, בחרו מנה, וקבלו מסלול מהיר למתכון, מומחה או קצבייה.</Text>
         <AppButton title="התחילו" onPress={() => router.push('/radar')} />
+        <AppButton title="המתכונים שלי" variant="secondary" onPress={() => router.push('/my-recipes' as never)} />
       </AppCard>
+      </Animated.View>
     </AppScreen>
   );
 }
@@ -41,7 +58,10 @@ export default function HomeScreen() {
 const styles = StyleSheet.create({
   screen: {
     flex: 1,
-    justifyContent: 'space-between',
+    justifyContent: 'center',
+  },
+  intro: {
+    gap: 18,
   },
   top: {
     gap: 22,

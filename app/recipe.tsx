@@ -7,6 +7,7 @@ import { AppCard } from '@/components/AppCard';
 import { AppScreen } from '@/components/AppScreen';
 import { SectionTitle } from '@/components/SectionTitle';
 import { SmokeImage } from '@/components/SmokeImage';
+import { SmokePulse } from '@/components/SmokePulse';
 import { smokeImages } from '@/constants/smokeImages';
 import { rtlRow, rtlText, smokeColors } from '@/constants/smokeTheme';
 import { generateRecipe } from '@/services/smokeRadarService';
@@ -48,6 +49,7 @@ export default function RecipeScreen() {
       />
 
       <SmokeImage source={smokeImages.fire} height={130} />
+      {loading ? <SmokePulse label="מחולל מתכון מותאם..." /> : null}
 
       <View style={styles.progress}>
         {[1, 2, 3, 4].map((item) => (

@@ -6,7 +6,9 @@ import { AppButton } from '@/components/AppButton';
 import { AppCard } from '@/components/AppCard';
 import { AppScreen } from '@/components/AppScreen';
 import { SectionTitle } from '@/components/SectionTitle';
-import { rtlRow, rtlText, smokeColors } from '@/constants/smokeTheme';
+import { SmokeImage } from '@/components/SmokeImage';
+import { smokeImages } from '@/constants/smokeImages';
+import { centerBlockText, rtlRow, rtlText, smokeColors } from '@/constants/smokeTheme';
 import { askExpert } from '@/services/smokeRadarService';
 
 export default function ExpertScreen() {
@@ -40,6 +42,8 @@ export default function ExpertScreen() {
         subtitle="זהו מסלול נפרד ממחולל המתכונים. התשובה מגיעה מהשרת כשהחיבור זמין."
       />
 
+      <SmokeImage source={smokeImages.expert} height={125} />
+
       <AppCard>
         <Text style={styles.label}>על מה תרצו לשאול?</Text>
         <TextInput
@@ -68,7 +72,7 @@ const styles = StyleSheet.create({
     color: smokeColors.text,
     fontSize: 20,
     fontWeight: '900',
-    ...rtlText,
+    ...centerBlockText,
   },
   input: {
     minHeight: 170,

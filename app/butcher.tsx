@@ -27,6 +27,11 @@ export default function ButcherScreen() {
 
       <SmokeImage source={smokeImages.butcher} height={130} />
 
+      <AppButton
+        title="מצא קצביות לידי"
+        onPress={() => Linking.openURL('https://www.google.com/maps/search/?api=1&query=%D7%A7%D7%A6%D7%91%D7%99%D7%94%20%D7%A7%D7%A8%D7%95%D7%91%D7%94%20%D7%90%D7%9C%D7%99%D7%99')}
+      />
+
       <View style={styles.list}>
         {items.map((item) => (
           <AppCard key={item.id}>
