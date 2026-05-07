@@ -1,4 +1,5 @@
-import { ImageBackground, StyleSheet, View } from 'react-native';
+import { Image } from 'expo-image';
+import { StyleSheet, View } from 'react-native';
 
 type SmokeImageProps = {
   source: string;
@@ -7,9 +8,17 @@ type SmokeImageProps = {
 
 export function SmokeImage({ source, height = 180 }: SmokeImageProps) {
   return (
-    <ImageBackground source={{ uri: source }} style={[styles.image, { height }]} imageStyle={styles.imageRadius}>
+    <View style={[styles.image, { height }]}>
+      <Image
+        source={source}
+        style={StyleSheet.absoluteFill}
+        contentFit="cover"
+        transition={260}
+        cachePolicy="disk"
+        placeholder={{ blurhash: 'L25O6[0L4T~W4TMyx[t7M{Rj00IV' }}
+      />
       <View style={styles.overlay} />
-    </ImageBackground>
+    </View>
   );
 }
 
@@ -19,11 +28,8 @@ const styles = StyleSheet.create({
     borderRadius: 22,
     backgroundColor: '#120B08',
   },
-  imageRadius: {
-    borderRadius: 22,
-  },
   overlay: {
-    flex: 1,
+    ...StyleSheet.absoluteFillObject,
     backgroundColor: 'rgba(8, 6, 5, 0.28)',
   },
 });

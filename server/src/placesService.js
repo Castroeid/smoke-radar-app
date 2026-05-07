@@ -7,7 +7,7 @@ const defaultLocation = { lat: 32.0853, lng: 34.7818 };
 
 export async function findButchersWithPlaces({ lat, lng } = {}) {
   if (!process.env.GOOGLE_PLACES_API_KEY) {
-    return markFallbackButchers('אין מפתח Google Places פעיל בשרת.');
+    return markFallbackButchers('אין מפתח גוגל פעיל בשרת.');
   }
 
   const location = {
@@ -31,10 +31,10 @@ export async function findButchersWithPlaces({ lat, lng } = {}) {
       return textResults;
     }
 
-    return markFallbackButchers('Google Places לא החזיר תוצאות באזור הזה.');
+    return markFallbackButchers('גוגל לא החזיר תוצאות באזור הזה.');
   } catch (error) {
     console.warn('Falling back to mock butchers:', error.message);
-    return markFallbackButchers('החיבור ל-Google Places נכשל זמנית.');
+    return markFallbackButchers('החיבור לגוגל נכשל זמנית.');
   }
 }
 
@@ -152,10 +152,10 @@ function mapPlaceToButcher(place, location, searchType) {
 
 function buildReviewHighlight(place, distanceMeters, searchType) {
   const distanceText = distanceMeters ? `כ-${formatDistance(distanceMeters)} מהמיקום שלכם. ` : '';
-  const ratingText = place.user_ratings_total ? `${place.user_ratings_total} דירוגים ב-Google Places. ` : '';
+  const ratingText = place.user_ratings_total ? `${place.user_ratings_total} דירוגים בגוגל. ` : '';
   const searchText =
     searchType === 'new-text'
-      ? 'נמצאה ב-Places API החדש לפי האזור. '
+      ? 'נמצאה בחיפוש גוגל לפי האזור. '
       : searchType === 'text'
         ? 'נמצאה בחיפוש טקסט לפי האזור. '
         : '';

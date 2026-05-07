@@ -52,7 +52,7 @@ export default function RecipeScreen() {
         subtitle={`הנתח שנבחר: ${selectedCut}`}
       />
 
-      <SmokeImage source={smokeImages.fire} height={130} />
+      <SmokeImage source={smokeImages.recipe} height={140} />
       <SmokePulse label={loading ? 'מחולל מתכון מותאם...' : 'הרדאר מתאים נתח, שיטה ותיבול'} />
 
       <View style={styles.progress}>

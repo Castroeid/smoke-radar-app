@@ -39,10 +39,10 @@ export default function ExpertScreen() {
       <SectionTitle
         eyebrow="שאל את המומחה"
         title="שאלה מהירה על בשר, אש ועשן"
-        subtitle="זהו מסלול נפרד ממחולל המתכונים. התשובה מגיעה מהשרת כשהחיבור זמין."
+        subtitle="תשובה קצרה ומעשית בסגנון פיטמאסטר: חום, זמן, מרקם וטעות אחת שכדאי לא לעשות."
       />
 
-      <SmokeImage source={smokeImages.expert} height={125} />
+      <SmokeImage source={smokeImages.expert} height={155} />
 
       <AppCard>
         <Text style={styles.label}>על מה תרצו לשאול?</Text>

@@ -8,7 +8,7 @@ import { AppScreen } from '@/components/AppScreen';
 import { SectionTitle } from '@/components/SectionTitle';
 import { SmokeImage } from '@/components/SmokeImage';
 import { smokeImages } from '@/constants/smokeImages';
-import { centerBlockText, rtlRow, rtlText, smokeColors } from '@/constants/smokeTheme';
+import { rtlBlockText, rtlRow, rtlText, smokeColors } from '@/constants/smokeTheme';
 import { requestUserLocation, type UserLocation } from '@/services/locationService';
 import { findNearbyButchers, type Butcher } from '@/services/smokeRadarService';
 
@@ -26,8 +26,8 @@ export default function ButcherScreen() {
         const hasGoogleResults = results.some((item) => item.source === 'google');
         setLocationStatus(
           hasGoogleResults
-            ? `נמצא מיקום: ${formatLocation(location)}. מוצגות תוצאות אמיתיות מ-Google Places.`
-            : `נמצא מיקום: ${formatLocation(location)}, אבל Google Places לא החזיר קצביות אמיתיות. מוצגות תוצאות ברירת מחדל.`
+            ? `נמצא מיקום: ${formatLocation(location)}. מוצגות קצביות אמיתיות מגוגל.`
+            : `נמצא מיקום: ${formatLocation(location)}, אבל גוגל לא החזיר קצביות אמיתיות באזור. מוצגות תוצאות ברירת מחדל.`
         );
       }
     } finally {
@@ -56,7 +56,7 @@ export default function ButcherScreen() {
       return;
     }
 
-    setLocationStatus(`נמצא מיקום: ${formatLocation(result.location)}. מחפשים ב-Google Places...`);
+    setLocationStatus(`נמצא מיקום: ${formatLocation(result.location)}. מחפשים קצביות בגוגל...`);
     await loadButchers(result.location);
   }, [loadButchers]);
 
@@ -69,10 +69,10 @@ export default function ButcherScreen() {
       <SectionTitle
         eyebrow="מציאת קצביות"
         title="קצביות קרובות אליכם"
-        subtitle="תוצאות קרובות לפי Google Places כשיש מפתח פעיל, עם fallback מקומי אם החיבור לא זמין."
+        subtitle="הקצביות מוצגות לפי המיקום שלכם, עם תוצאות גוגל כשהחיבור פעיל."
       />
 
-      <SmokeImage source={smokeImages.butcher} height={130} />
+      <SmokeImage source={smokeImages.butcher} height={145} />
 
       <AppButton title={loading ? 'מחפש קצביות...' : 'מצא קצביות לידי'} onPress={findNearMe} />
       <AppButton title="פתחו הרשאות מיקום" variant="ghost" onPress={() => Linking.openSettings()} />
@@ -113,7 +113,7 @@ const styles = StyleSheet.create({
     color: smokeColors.muted,
     fontSize: 15,
     lineHeight: 22,
-    ...centerBlockText,
+    ...rtlBlockText,
   },
   topRow: {
     ...rtlRow,

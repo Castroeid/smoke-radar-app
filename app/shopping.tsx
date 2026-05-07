@@ -27,7 +27,7 @@ export default function ShoppingScreen() {
         subtitle="כל מה שצריך לפני שעוברים לרדאר הקצביות."
       />
 
-      <SmokeImage source={smokeImages.shopping} height={125} />
+      <SmokeImage source={smokeImages.butcherShop} height={135} />
 
       <AppCard elevated>
         <Text style={styles.recipeName}>{recipe?.title ?? selectedCut}</Text>

@@ -1,10 +1,12 @@
 import { DarkTheme, ThemeProvider } from '@react-navigation/native';
+import { Image } from 'expo-image';
 import { Stack } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import { useEffect } from 'react';
 import { Platform, Pressable, StyleSheet, Text, View } from 'react-native';
 import 'react-native-reanimated';
 
+import { smokeImages } from '@/constants/smokeImages';
 import { rtlRow, rtlText, rtlView, smokeColors } from '@/constants/smokeTheme';
 
 const smokeTheme = {
@@ -26,6 +28,8 @@ export default function RootLayout() {
       document.documentElement.lang = 'he';
       document.body.dir = 'rtl';
     }
+
+    void Promise.all(Object.values(smokeImages).map((source) => Image.prefetch(source, 'disk')));
   }, []);
 
   return (

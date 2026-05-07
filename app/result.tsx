@@ -6,6 +6,8 @@ import { AppButton } from '@/components/AppButton';
 import { AppCard } from '@/components/AppCard';
 import { AppScreen } from '@/components/AppScreen';
 import { SectionTitle } from '@/components/SectionTitle';
+import { SmokeImage } from '@/components/SmokeImage';
+import { smokeImages } from '@/constants/smokeImages';
 import { centerBlockText, rtlRow, rtlText, smokeColors } from '@/constants/smokeTheme';
 import { saveRecipe } from '@/services/savedRecipes';
 import type { ExpertAnswer, RecipeResult, RecipeSauce, RecipeSideDish } from '@/services/smokeRadarTypes';
@@ -44,6 +46,7 @@ export default function ResultScreen() {
   return (
     <AppScreen>
       <SectionTitle title={title} subtitle="אפשר להמשיך לרשימת קניות, לשתף או לחזור לרדאר." />
+      <SmokeImage source={source === 'expert' ? smokeImages.expert : smokeImages.result} height={135} />
 
       {source === 'recipe' && parsedPayload ? <RecipeView recipe={parsedPayload as RecipeResult} /> : null}
       {source === 'expert' && parsedPayload ? <ExpertView answer={parsedPayload as ExpertAnswer} /> : null}
