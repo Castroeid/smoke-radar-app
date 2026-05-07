@@ -14,6 +14,7 @@ import { getTrendingCuts, type RadarCut } from '@/services/smokeRadarService';
 export default function RadarScreen() {
   const [items, setItems] = useState<RadarCut[]>([]);
   const [selectedCut, setSelectedCut] = useState<RadarCut | null>(null);
+  const [showInfo, setShowInfo] = useState(false);
 
   useEffect(() => {
     getTrendingCuts().then((cuts) => {
@@ -28,9 +29,26 @@ export default function RadarScreen() {
     }
   };
 
+  const continueWithoutTrend = () => {
+    router.push({ pathname: '/selection', params: { custom: 'true' } });
+  };
+
   return (
     <AppScreen>
       <SectionTitle title="מה חם עכשיו?" subtitle="בחרו טרנד בשרי אחד והמשיכו למסלול שמתאים לכם." />
+
+      <Pressable style={styles.infoButton} onPress={() => setShowInfo((current) => !current)}>
+        <Text style={styles.infoIcon}>i</Text>
+        <Text style={styles.infoText}>מה זה אומר?</Text>
+      </Pressable>
+
+      {showInfo ? (
+        <AppCard style={styles.infoCard}>
+          <Text style={styles.infoBody}>
+            הרדאר מציג כרגע טרנדים מדומים ומומנטום לדוגמה כדי לדמות את זרימת האתר. בהמשך נחבר נתוני שימוש, חיפושים ומתכונים אמיתיים כדי לייצר דירוג חי.
+          </Text>
+        </AppCard>
+      ) : null}
 
       <SmokeImage source={smokeImages.smoker} height={135} />
 
@@ -59,6 +77,7 @@ export default function RadarScreen() {
       </View>
 
       <AppButton title="בחרו מנה" onPress={continueToActions} />
+      <AppButton title="אני יודע מה אני רוצה" variant="secondary" onPress={continueWithoutTrend} />
     </AppScreen>
   );
 }
@@ -90,6 +109,44 @@ const styles = StyleSheet.create({
   },
   list: {
     gap: 12,
+  },
+  infoButton: {
+    alignSelf: 'center',
+    flexDirection: 'row-reverse',
+    alignItems: 'center',
+    gap: 8,
+    borderRadius: 999,
+    borderWidth: 1,
+    borderColor: smokeColors.border,
+    backgroundColor: '#120B08',
+    paddingHorizontal: 14,
+    paddingVertical: 9,
+  },
+  infoIcon: {
+    width: 24,
+    height: 24,
+    borderRadius: 12,
+    backgroundColor: smokeColors.orange,
+    color: smokeColors.black,
+    fontSize: 16,
+    fontWeight: '900',
+    lineHeight: 24,
+    textAlign: 'center',
+  },
+  infoText: {
+    color: smokeColors.text,
+    fontSize: 14,
+    fontWeight: '900',
+  },
+  infoCard: {
+    borderColor: smokeColors.orange,
+  },
+  infoBody: {
+    color: smokeColors.muted,
+    fontSize: 15,
+    lineHeight: 23,
+    textAlign: 'center',
+    writingDirection: 'rtl',
   },
   card: {
     minHeight: 158,

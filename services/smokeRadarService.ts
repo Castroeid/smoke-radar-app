@@ -6,6 +6,7 @@ import {
   generateMockRecipe,
   getMockTrendingCuts,
 } from '@/services/smokeRadarMock';
+import { normalizeCutName } from '@/services/cutUtils';
 import type { Butcher, ExpertAnswer, RadarCut, RecipeRequest, RecipeResult } from '@/services/smokeRadarTypes';
 
 export type { Butcher, ExpertAnswer, RadarCut, RecipeRequest, RecipeResult } from '@/services/smokeRadarTypes';
@@ -24,18 +25,20 @@ export async function getTrendingCuts(): Promise<RadarCut[]> {
 }
 
 export async function generateRecipe(req: RecipeRequest): Promise<RecipeResult> {
+  const normalizedRequest = { ...req, cut: normalizeCutName(req.cut) };
+
   if (shouldUseMockData()) {
-    return generateMockRecipe(req);
+    return generateMockRecipe(normalizedRequest);
   }
 
   try {
     return await apiRequest<RecipeResult>(smokeRadarEndpoints.recipe, {
       method: 'POST',
-      body: req,
+      body: normalizedRequest,
     });
   } catch (error) {
     console.warn('Using mock recipe after API failure:', error);
-    return generateMockRecipe(req);
+    return generateMockRecipe(normalizedRequest);
   }
 }
 
@@ -55,13 +58,14 @@ export async function askExpert(question: string): Promise<ExpertAnswer> {
   }
 }
 
-export async function findNearbyButchers(): Promise<Butcher[]> {
+export async function findNearbyButchers(location?: { lat: number; lng: number } | null): Promise<Butcher[]> {
   if (shouldUseMockData()) {
     return findMockNearbyButchers();
   }
 
   try {
-    return await apiRequest<Butcher[]>(smokeRadarEndpoints.butchers);
+    const query = location ? `?lat=${encodeURIComponent(location.lat)}&lng=${encodeURIComponent(location.lng)}` : '';
+    return await apiRequest<Butcher[]>(`${smokeRadarEndpoints.butchers}${query}`);
   } catch (error) {
     console.warn('Using mock butchers after API failure:', error);
     return findMockNearbyButchers();

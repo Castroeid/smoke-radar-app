@@ -15,7 +15,12 @@ export function AppScreen({ children, scroll = true, style }: AppScreenProps) {
   }
 
   return (
-    <ScrollView style={styles.container} contentContainerStyle={[styles.content, style]}>
+    <ScrollView
+      style={styles.container}
+      contentContainerStyle={[styles.content, style]}
+      keyboardShouldPersistTaps="handled"
+      showsVerticalScrollIndicator={false}
+    >
       {children}
     </ScrollView>
   );
@@ -31,5 +36,6 @@ const styles = StyleSheet.create({
     ...rtlContent,
     gap: 18,
     padding: screenPadding,
+    paddingBottom: 104,
   },
 });

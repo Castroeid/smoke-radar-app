@@ -9,20 +9,24 @@ import { SectionTitle } from '@/components/SectionTitle';
 import { SmokeImage } from '@/components/SmokeImage';
 import { SmokePulse } from '@/components/SmokePulse';
 import { smokeImages } from '@/constants/smokeImages';
-import { rtlRow, rtlText, smokeColors } from '@/constants/smokeTheme';
+import { centerBlockText, centerText, rtlRow, smokeColors } from '@/constants/smokeTheme';
+import { normalizeCutName } from '@/services/cutUtils';
 import { generateRecipe } from '@/services/smokeRadarService';
 
 const methods = ['מעשנה', 'מנגל ישראלי', 'גריל פחמים', 'סיר קדירה', 'תנור ביתי', 'פלנצ׳ה', 'בישול ארוך בתנור'];
 const efforts = ['מהיר', 'מאוזן', 'מושקע'];
 const kosherOptions = ['כשר', 'לא כשר'];
+const seasoningStyles = ['קלאסי', 'ישראלי', 'מעושן עמוק', 'חריף', 'עשבי תיבול', 'אסייתי'];
 
 export default function RecipeScreen() {
   const { meat } = useLocalSearchParams<{ meat?: string }>();
-  const selectedCut = typeof meat === 'string' && meat.length > 0 ? meat : 'אסאדו מעושן';
+  const selectedTrend = typeof meat === 'string' && meat.length > 0 ? meat : 'אסאדו';
+  const selectedCut = normalizeCutName(selectedTrend);
   const [step, setStep] = useState(1);
   const [method, setMethod] = useState(methods[0]);
   const [effort, setEffort] = useState(efforts[1]);
   const [kosherPreference, setKosherPreference] = useState(kosherOptions[0]);
+  const [seasoningStyle, setSeasoningStyle] = useState(seasoningStyles[0]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
@@ -31,7 +35,7 @@ export default function RecipeScreen() {
     setError('');
 
     try {
-      const recipe = await generateRecipe({ cut: selectedCut, method, effort, kosherPreference });
+      const recipe = await generateRecipe({ cut: selectedCut, method, effort, kosherPreference, seasoningStyle });
       router.push({ pathname: '/result', params: { source: 'recipe', payload: JSON.stringify(recipe), meat: selectedCut } });
     } catch {
       setError('לא הצלחנו ליצור מתכון כרגע. נסו שוב בעוד רגע.');
@@ -49,10 +53,10 @@ export default function RecipeScreen() {
       />
 
       <SmokeImage source={smokeImages.fire} height={130} />
-      {loading ? <SmokePulse label="מחולל מתכון מותאם..." /> : null}
+      <SmokePulse label={loading ? 'מחולל מתכון מותאם...' : 'הרדאר מתאים נתח, שיטה ותיבול'} />
 
       <View style={styles.progress}>
-        {[1, 2, 3, 4].map((item) => (
+        {[1, 2, 3, 4, 5].map((item) => (
           <View key={item} style={[styles.dot, item <= step && styles.dotActive]}>
             <Text style={[styles.dotText, item <= step && styles.dotTextActive]}>{item}</Text>
           </View>
@@ -92,11 +96,22 @@ export default function RecipeScreen() {
 
       {step === 4 ? (
         <ChoiceStep
-          title="4. זמן ורמת השקעה"
+          title="4. סגנון תיבול"
+          options={seasoningStyles}
+          value={seasoningStyle}
+          onSelect={setSeasoningStyle}
+          onBack={() => setStep(3)}
+          onNext={() => setStep(5)}
+        />
+      ) : null}
+
+      {step === 5 ? (
+        <ChoiceStep
+          title="5. זמן ורמת השקעה"
           options={efforts}
           value={effort}
           onSelect={setEffort}
-          onBack={() => setStep(3)}
+          onBack={() => setStep(4)}
           onNext={generate}
           nextTitle={loading ? 'מחולל מתכון...' : 'חוללו מתכון'}
           error={error}
@@ -144,6 +159,7 @@ function ChoiceStep({ title, options, value, onSelect, onBack, onNext, nextTitle
 const styles = StyleSheet.create({
   progress: {
     ...rtlRow,
+    justifyContent: 'center',
     gap: 10,
   },
   dot: {
@@ -172,19 +188,19 @@ const styles = StyleSheet.create({
     color: smokeColors.text,
     fontSize: 24,
     fontWeight: '900',
-    ...rtlText,
+    ...centerBlockText,
   },
   selectedCut: {
     color: smokeColors.orange,
-    fontSize: 32,
+    fontSize: 30,
     fontWeight: '900',
-    ...rtlText,
+    ...centerBlockText,
   },
   helper: {
     color: smokeColors.muted,
     fontSize: 15,
     lineHeight: 23,
-    ...rtlText,
+    ...centerBlockText,
   },
   options: {
     gap: 10,
@@ -206,7 +222,7 @@ const styles = StyleSheet.create({
     color: smokeColors.muted,
     fontSize: 17,
     fontWeight: '900',
-    ...rtlText,
+    ...centerText,
   },
   optionTextSelected: {
     color: smokeColors.text,
@@ -215,7 +231,7 @@ const styles = StyleSheet.create({
     color: smokeColors.gold,
     fontSize: 14,
     lineHeight: 22,
-    ...rtlText,
+    ...centerBlockText,
   },
   buttonRow: {
     ...rtlRow,

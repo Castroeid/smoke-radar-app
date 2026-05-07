@@ -11,6 +11,7 @@ export type RecipeRequest = {
   method: string;
   effort: string;
   kosherPreference: string;
+  seasoningStyle: string;
 };
 
 export type RecipeSideDish = {

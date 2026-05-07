@@ -5,9 +5,10 @@ import { Animated, StyleSheet, Text, View } from 'react-native';
 import { AppButton } from '@/components/AppButton';
 import { AppCard } from '@/components/AppCard';
 import { AppScreen } from '@/components/AppScreen';
+import { SmokePulse } from '@/components/SmokePulse';
 import { SmokeImage } from '@/components/SmokeImage';
 import { smokeImages } from '@/constants/smokeImages';
-import { centerBlockText, centerText, smokeColors } from '@/constants/smokeTheme';
+import { centerBlockText, smokeColors } from '@/constants/smokeTheme';
 
 export default function HomeScreen() {
   const intro = useRef(new Animated.Value(0)).current;
@@ -29,15 +30,7 @@ export default function HomeScreen() {
       <View style={styles.top}>
         <Text style={styles.logo}>SMOKE RADAR</Text>
         <SmokeImage source={smokeImages.hero} height={150} />
-        <View style={styles.radar}>
-          <View style={styles.ringLarge}>
-            <View style={styles.ringMedium}>
-              <View style={styles.ringSmall}>
-                <Text style={styles.radarText}>חם</Text>
-              </View>
-            </View>
-          </View>
-        </View>
+        <SmokePulse label="רדאר מתחמם..." />
       </View>
 
       <View style={styles.copy}>
@@ -72,45 +65,6 @@ const styles = StyleSheet.create({
     fontWeight: '900',
     letterSpacing: 0,
     textAlign: 'center',
-  },
-  radar: {
-    alignItems: 'center',
-    justifyContent: 'center',
-    paddingVertical: 24,
-  },
-  ringLarge: {
-    width: 230,
-    height: 230,
-    alignItems: 'center',
-    justifyContent: 'center',
-    borderRadius: 115,
-    borderWidth: 1,
-    borderColor: '#3A2118',
-    backgroundColor: '#110B08',
-  },
-  ringMedium: {
-    width: 164,
-    height: 164,
-    alignItems: 'center',
-    justifyContent: 'center',
-    borderRadius: 82,
-    borderWidth: 2,
-    borderColor: smokeColors.ember,
-    backgroundColor: '#1A100B',
-  },
-  ringSmall: {
-    width: 86,
-    height: 86,
-    alignItems: 'center',
-    justifyContent: 'center',
-    borderRadius: 43,
-    backgroundColor: smokeColors.orange,
-  },
-  radarText: {
-    color: smokeColors.black,
-    fontSize: 22,
-    fontWeight: '900',
-    ...centerText,
   },
   copy: {
     alignItems: 'stretch',

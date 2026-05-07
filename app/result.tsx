@@ -6,7 +6,7 @@ import { AppButton } from '@/components/AppButton';
 import { AppCard } from '@/components/AppCard';
 import { AppScreen } from '@/components/AppScreen';
 import { SectionTitle } from '@/components/SectionTitle';
-import { rtlRow, rtlText, smokeColors } from '@/constants/smokeTheme';
+import { centerBlockText, rtlRow, rtlText, smokeColors } from '@/constants/smokeTheme';
 import { saveRecipe } from '@/services/savedRecipes';
 import type { ExpertAnswer, RecipeResult, RecipeSideDish } from '@/services/smokeRadarTypes';
 
@@ -402,7 +402,7 @@ const styles = StyleSheet.create({
     color: smokeColors.text,
     fontSize: 22,
     fontWeight: '900',
-    ...rtlText,
+    ...centerBlockText,
   },
   actionGrid: {
     ...rtlRow,

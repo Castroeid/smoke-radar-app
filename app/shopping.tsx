@@ -8,7 +8,7 @@ import { AppScreen } from '@/components/AppScreen';
 import { SectionTitle } from '@/components/SectionTitle';
 import { SmokeImage } from '@/components/SmokeImage';
 import { smokeImages } from '@/constants/smokeImages';
-import { rtlRow, rtlText, smokeColors } from '@/constants/smokeTheme';
+import { centerBlockText, rtlRow, rtlText, smokeColors } from '@/constants/smokeTheme';
 import type { RecipeResult, RecipeSideDish } from '@/services/smokeRadarTypes';
 
 export default function ShoppingScreen() {
@@ -131,7 +131,7 @@ const styles = StyleSheet.create({
     fontSize: 28,
     fontWeight: '900',
     lineHeight: 34,
-    ...rtlText,
+    ...centerBlockText,
   },
   section: {
     gap: 8,
@@ -140,7 +140,7 @@ const styles = StyleSheet.create({
     color: smokeColors.gold,
     fontSize: 18,
     fontWeight: '900',
-    ...rtlText,
+    ...centerBlockText,
   },
   itemRow: {
     minHeight: 48,
@@ -202,12 +202,12 @@ const styles = StyleSheet.create({
     color: smokeColors.text,
     fontSize: 22,
     fontWeight: '900',
-    ...rtlText,
+    ...centerBlockText,
   },
   nextText: {
     color: smokeColors.muted,
     fontSize: 16,
     lineHeight: 24,
-    ...rtlText,
+    ...centerBlockText,
   },
 });

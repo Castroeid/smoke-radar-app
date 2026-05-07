@@ -30,7 +30,7 @@ export function SmokePulse({ label = 'מחממים את המעשנה...' }: Smok
       <Animated.View style={[styles.outer, { opacity, transform: [{ scale }] }]}>
         <View style={styles.inner} />
       </Animated.View>
-      <Text style={styles.label}>{label}</Text>
+      {label ? <Text style={styles.label}>{label}</Text> : null}
     </View>
   );
 }

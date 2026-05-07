@@ -1,4 +1,5 @@
-import { useEffect, useState } from 'react';
+import { router } from 'expo-router';
+import { useCallback, useEffect, useState } from 'react';
 import { Linking, StyleSheet, Text, View } from 'react-native';
 
 import { AppButton } from '@/components/AppButton';
@@ -7,15 +8,42 @@ import { AppScreen } from '@/components/AppScreen';
 import { SectionTitle } from '@/components/SectionTitle';
 import { SmokeImage } from '@/components/SmokeImage';
 import { smokeImages } from '@/constants/smokeImages';
-import { rtlRow, rtlText, smokeColors } from '@/constants/smokeTheme';
+import { centerBlockText, rtlRow, rtlText, smokeColors } from '@/constants/smokeTheme';
+import { getUserLocation, type UserLocation } from '@/services/locationService';
 import { findNearbyButchers, type Butcher } from '@/services/smokeRadarService';
 
 export default function ButcherScreen() {
   const [items, setItems] = useState<Butcher[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [locationStatus, setLocationStatus] = useState('מציגים תוצאות קרובות לדוגמה עד לקבלת מיקום.');
+
+  const loadButchers = useCallback(async (location?: UserLocation | null) => {
+    setLoading(true);
+    try {
+      const results = await findNearbyButchers(location);
+      setItems(results);
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  const findNearMe = useCallback(async () => {
+    setLocationStatus('מבקשים מיקום ומחפשים קצביות קרובות...');
+    const location = await getUserLocation();
+
+    if (!location) {
+      setLocationStatus('לא התקבלה הרשאת מיקום. מוצגות תוצאות ברירת מחדל.');
+      await loadButchers(null);
+      return;
+    }
+
+    setLocationStatus('מציגים קצביות לפי המיקום הנוכחי שלכם.');
+    await loadButchers(location);
+  }, [loadButchers]);
 
   useEffect(() => {
-    findNearbyButchers().then(setItems);
-  }, []);
+    void findNearMe();
+  }, [findNearMe]);
 
   return (
     <AppScreen>
@@ -27,10 +55,8 @@ export default function ButcherScreen() {
 
       <SmokeImage source={smokeImages.butcher} height={130} />
 
-      <AppButton
-        title="מצא קצביות לידי"
-        onPress={() => Linking.openURL('https://www.google.com/maps/search/?api=1&query=%D7%A7%D7%A6%D7%91%D7%99%D7%94%20%D7%A7%D7%A8%D7%95%D7%91%D7%94%20%D7%90%D7%9C%D7%99%D7%99')}
-      />
+      <AppButton title={loading ? 'מחפש קצביות...' : 'מצא קצביות לידי'} onPress={findNearMe} />
+      <Text style={styles.status}>{locationStatus}</Text>
 
       <View style={styles.list}>
         {items.map((item) => (
@@ -52,6 +78,8 @@ export default function ButcherScreen() {
           </AppCard>
         ))}
       </View>
+      <AppButton title="חזרה לרדאר" variant="secondary" onPress={() => router.push('/radar')} />
+      <AppButton title="לעמוד הבית" variant="ghost" onPress={() => router.push('/')} />
     </AppScreen>
   );
 }
@@ -59,6 +87,12 @@ export default function ButcherScreen() {
 const styles = StyleSheet.create({
   list: {
     gap: 12,
+  },
+  status: {
+    color: smokeColors.muted,
+    fontSize: 15,
+    lineHeight: 22,
+    ...centerBlockText,
   },
   topRow: {
     ...rtlRow,
