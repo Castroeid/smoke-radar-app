@@ -5,18 +5,39 @@ export type UserLocation = {
   lng: number;
 };
 
-export async function getUserLocation(): Promise<UserLocation | null> {
+export type UserLocationResult = {
+  location: UserLocation | null;
+  reason?: 'services-disabled' | 'permission-denied' | 'position-unavailable';
+  canAskAgain?: boolean;
+};
+
+export async function requestUserLocation(): Promise<UserLocationResult> {
   try {
-    const permission = await Location.requestForegroundPermissionsAsync();
-    if (permission.status !== 'granted') {
-      return null;
+    const servicesEnabled = await Location.hasServicesEnabledAsync();
+    if (!servicesEnabled) {
+      return { location: null, reason: 'services-disabled' };
     }
 
-    const position = await Location.getCurrentPositionAsync({ accuracy: Location.Accuracy.Balanced });
-    return { lat: position.coords.latitude, lng: position.coords.longitude };
+    const currentPermission = await Location.getForegroundPermissionsAsync();
+    const permission =
+      currentPermission.status === 'granted' ? currentPermission : await Location.requestForegroundPermissionsAsync();
+
+    if (permission.status !== 'granted') {
+      return { location: null, reason: 'permission-denied', canAskAgain: permission.canAskAgain };
+    }
+
+    const lastKnownPosition = await Location.getLastKnownPositionAsync({ maxAge: 60000 });
+    const position = lastKnownPosition ?? (await Location.getCurrentPositionAsync({ accuracy: Location.Accuracy.Balanced }));
+    return { location: { lat: position.coords.latitude, lng: position.coords.longitude } };
   } catch {
-    return getBrowserLocation();
+    const location = await getBrowserLocation();
+    return location ? { location } : { location: null, reason: 'position-unavailable' };
   }
+}
+
+export async function getUserLocation(): Promise<UserLocation | null> {
+  const result = await requestUserLocation();
+  return result.location;
 }
 
 function getBrowserLocation() {

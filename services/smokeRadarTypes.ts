@@ -20,6 +20,13 @@ export type RecipeSideDish = {
   steps: string[];
 };
 
+export type RecipeSauce = {
+  title: string;
+  description: string;
+  ingredients: string[];
+  steps: string[];
+};
+
 export type RecipeResult = {
   title: string;
   prepTime: string;
@@ -28,7 +35,7 @@ export type RecipeResult = {
   methodGuide: string[];
   steps: string[];
   sideDishes: RecipeSideDish[];
-  sauces: string[];
+  sauces: RecipeSauce[] | string[];
 };
 
 export type ExpertAnswer = {

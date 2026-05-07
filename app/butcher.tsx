@@ -9,7 +9,7 @@ import { SectionTitle } from '@/components/SectionTitle';
 import { SmokeImage } from '@/components/SmokeImage';
 import { smokeImages } from '@/constants/smokeImages';
 import { centerBlockText, rtlRow, rtlText, smokeColors } from '@/constants/smokeTheme';
-import { getUserLocation, type UserLocation } from '@/services/locationService';
+import { requestUserLocation, type UserLocation } from '@/services/locationService';
 import { findNearbyButchers, type Butcher } from '@/services/smokeRadarService';
 
 export default function ButcherScreen() {
@@ -29,16 +29,22 @@ export default function ButcherScreen() {
 
   const findNearMe = useCallback(async () => {
     setLocationStatus('מבקשים מיקום ומחפשים קצביות קרובות...');
-    const location = await getUserLocation();
+    const result = await requestUserLocation();
 
-    if (!location) {
-      setLocationStatus('לא התקבלה הרשאת מיקום. מוצגות תוצאות ברירת מחדל.');
+    if (!result.location) {
+      const message =
+        result.reason === 'services-disabled'
+          ? 'שירותי המיקום כבויים בטלפון. הפעילו Location במכשיר ונסו שוב.'
+          : result.reason === 'permission-denied' && result.canAskAgain === false
+            ? 'הרשאת המיקום חסומה ל-Expo Go. פתחו הגדרות ואפשרו Location.'
+            : 'לא התקבלה הרשאת מיקום. לחצו שוב ואשרו מיקום, או בדקו הרשאות בטלפון.';
+      setLocationStatus(`${message} בינתיים מוצגות תוצאות ברירת מחדל.`);
       await loadButchers(null);
       return;
     }
 
     setLocationStatus('מציגים קצביות לפי המיקום הנוכחי שלכם.');
-    await loadButchers(location);
+    await loadButchers(result.location);
   }, [loadButchers]);
 
   useEffect(() => {
@@ -56,6 +62,7 @@ export default function ButcherScreen() {
       <SmokeImage source={smokeImages.butcher} height={130} />
 
       <AppButton title={loading ? 'מחפש קצביות...' : 'מצא קצביות לידי'} onPress={findNearMe} />
+      <AppButton title="פתחו הרשאות מיקום" variant="ghost" onPress={() => Linking.openSettings()} />
       <Text style={styles.status}>{locationStatus}</Text>
 
       <View style={styles.list}>

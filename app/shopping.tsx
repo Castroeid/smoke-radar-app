@@ -9,7 +9,7 @@ import { SectionTitle } from '@/components/SectionTitle';
 import { SmokeImage } from '@/components/SmokeImage';
 import { smokeImages } from '@/constants/smokeImages';
 import { centerBlockText, rtlRow, rtlText, smokeColors } from '@/constants/smokeTheme';
-import type { RecipeResult, RecipeSideDish } from '@/services/smokeRadarTypes';
+import type { RecipeResult, RecipeSauce, RecipeSideDish } from '@/services/smokeRadarTypes';
 
 export default function ShoppingScreen() {
   const { payload, meat } = useLocalSearchParams<{ payload?: string; meat?: string }>();
@@ -82,9 +82,11 @@ function ShoppingSection({ title, items }: { title: string; items: string[] }) {
 }
 
 function buildShoppingItems(recipe: RecipeResult | null, selectedCut: string) {
+  const sauces = normalizeSauces(recipe?.sauces ?? []);
+
   return {
     ingredients: recipe?.ingredients ?? [selectedCut],
-    sauces: recipe?.sauces ?? [],
+    sauces: sauces.flatMap((sauce) => [`${sauce.title}:`, ...sauce.ingredients]),
   };
 }
 
@@ -125,6 +127,21 @@ function normalizeSideDishes(sideDishes: RecipeResult['sideDishes'] | string[] =
   });
 }
 
+function normalizeSauces(sauces: RecipeResult['sauces'] = []): RecipeSauce[] {
+  return sauces.map((sauce) => {
+    if (typeof sauce === 'string') {
+      return {
+        title: sauce,
+        description: 'רוטב מומלץ ליד המנה.',
+        ingredients: [sauce],
+        steps: [],
+      };
+    }
+
+    return sauce;
+  });
+}
+
 const styles = StyleSheet.create({
   recipeName: {
     color: smokeColors.text,
@@ -146,6 +163,7 @@ const styles = StyleSheet.create({
     minHeight: 48,
     ...rtlRow,
     alignItems: 'center',
+    justifyContent: 'flex-end',
     gap: 10,
     borderRadius: 14,
     backgroundColor: '#120B08',
@@ -171,6 +189,7 @@ const styles = StyleSheet.create({
   },
   itemText: {
     flex: 1,
+    minWidth: 0,
     color: smokeColors.text,
     fontSize: 16,
     lineHeight: 23,

@@ -8,7 +8,7 @@ import { AppScreen } from '@/components/AppScreen';
 import { SectionTitle } from '@/components/SectionTitle';
 import { centerBlockText, rtlRow, rtlText, smokeColors } from '@/constants/smokeTheme';
 import { saveRecipe } from '@/services/savedRecipes';
-import type { ExpertAnswer, RecipeResult, RecipeSideDish } from '@/services/smokeRadarTypes';
+import type { ExpertAnswer, RecipeResult, RecipeSauce, RecipeSideDish } from '@/services/smokeRadarTypes';
 
 type ResultSource = 'recipe' | 'expert';
 
@@ -81,6 +81,7 @@ async function shareRecipe(recipe: RecipeResult) {
 
 function formatRecipeForShare(recipe: RecipeResult) {
   const sideDishes = normalizeSideDishes(recipe.sideDishes);
+  const sauces = normalizeSauces(recipe.sauces);
   const lines = [
     `Smoke Radar - ${recipe.title}`,
     `זמן הכנה: ${recipe.prepTime}`,
@@ -89,11 +90,11 @@ function formatRecipeForShare(recipe: RecipeResult) {
     'מצרכים:',
     ...recipe.ingredients.map((item) => `• ${cleanInlineText(item)}`),
     '',
-    'מדריך שיטת הבישול:',
-    ...getMethodGuide(recipe).map((item, index) => `${index + 1}. ${cleanInlineText(item)}`),
-    '',
     'שלבי הכנה:',
     ...recipe.steps.map((item, index) => `${index + 1}. ${cleanInlineText(item)}`),
+    '',
+    'טיפים לשיטת הבישול:',
+    ...getMethodGuide(recipe).map((item, index) => `${index + 1}. ${cleanInlineText(item)}`),
     '',
     'תוספות:',
     ...sideDishes.flatMap((dish) => [
@@ -102,7 +103,11 @@ function formatRecipeForShare(recipe: RecipeResult) {
     ]),
     '',
     'רטבים:',
-    ...recipe.sauces.map((item) => `• ${cleanInlineText(item)}`),
+    ...sauces.flatMap((sauce) => [
+      `• ${cleanInlineText(sauce.title)} - ${cleanInlineText(sauce.description)}`,
+      `  רכיבים: ${sauce.ingredients.map(cleanInlineText).join(', ')}`,
+      ...sauce.steps.map((step, index) => `  ${index + 1}. ${cleanInlineText(step)}`),
+    ]),
   ];
 
   return lines.join('\n');
@@ -111,6 +116,7 @@ function formatRecipeForShare(recipe: RecipeResult) {
 function RecipeView({ recipe }: { recipe: RecipeResult }) {
   const methodGuide = getMethodGuide(recipe);
   const sideDishes = normalizeSideDishes(recipe.sideDishes);
+  const sauces = normalizeSauces(recipe.sauces);
 
   return (
     <AppCard elevated>
@@ -121,11 +127,27 @@ function RecipeView({ recipe }: { recipe: RecipeResult }) {
       </View>
 
       <ResultSection title="מצרכים" items={recipe.ingredients} />
-      <ResultSection title="מדריך שיטת הבישול" items={methodGuide} numbered />
       <ResultSection title="שלבי הכנה" items={recipe.steps} numbered />
+      <MethodGuideSection items={methodGuide} />
       <SideDishSection sideDishes={sideDishes} />
-      <ResultSection title="רטבים" items={recipe.sauces} />
+      <SauceSection sauces={sauces} />
     </AppCard>
+  );
+}
+
+function MethodGuideSection({ items }: { items: string[] }) {
+  const [open, setOpen] = useState(false);
+
+  return (
+    <Pressable style={[styles.infoCard, open && styles.infoCardOpen]} onPress={() => setOpen((value) => !value)}>
+      <View style={styles.infoHeader}>
+        <Text style={styles.infoIcon}>i</Text>
+        <Text style={styles.infoTitle}>טיפים לשיטת הבישול</Text>
+        <Text style={styles.chevron}>{open ? '−' : '+'}</Text>
+      </View>
+      <Text style={styles.infoDescription}>מידע מקצועי לפני שמתחילים: חום, זמן, היפוך, עטיפה ומנוחה.</Text>
+      {open ? <ResultSection title="מה חשוב לדעת" items={items} numbered compact /> : null}
+    </Pressable>
   );
 }
 
@@ -149,6 +171,38 @@ function SideDishSection({ sideDishes }: { sideDishes: RecipeSideDish[] }) {
             </View>
             <Text style={styles.sideDescription}>{cleanInlineText(dish.description)}</Text>
             {isOpen ? <ResultSection title="איך מכינים" items={dish.steps} numbered compact /> : null}
+          </Pressable>
+        );
+      })}
+    </View>
+  );
+}
+
+function SauceSection({ sauces }: { sauces: RecipeSauce[] }) {
+  const [openIndex, setOpenIndex] = useState(0);
+
+  return (
+    <View style={styles.section}>
+      <Text style={styles.sectionTitle}>רטבים עם הסבר</Text>
+      {sauces.map((sauce, index) => {
+        const isOpen = openIndex === index;
+
+        return (
+          <Pressable
+            key={`${sauce.title}-${index}`}
+            style={[styles.sideCard, isOpen && styles.sideCardOpen]}
+            onPress={() => setOpenIndex(isOpen ? -1 : index)}>
+            <View style={styles.sideHeader}>
+              <Text style={styles.sideTitle}>{cleanInlineText(sauce.title)}</Text>
+              <Text style={styles.chevron}>{isOpen ? '−' : '+'}</Text>
+            </View>
+            <Text style={styles.sideDescription}>{cleanInlineText(sauce.description)}</Text>
+            {isOpen ? (
+              <>
+                <ResultSection title="רכיבים" items={sauce.ingredients} compact />
+                <ResultSection title="איך מכינים" items={sauce.steps} numbered compact />
+              </>
+            ) : null}
           </Pressable>
         );
       })}
@@ -246,6 +300,23 @@ function normalizeSideDishes(sideDishes: RecipeResult['sideDishes'] | string[] =
   });
 }
 
+function normalizeSauces(sauces: RecipeResult['sauces'] = []): RecipeSauce[] {
+  return sauces.map((sauce) => {
+    if (typeof sauce === 'string') {
+      return {
+        title: sauce,
+        description: 'רוטב מומלץ ליד המנה. פתחו כדי לראות רכיבים והכנה בסיסית.',
+        ingredients: sauce.includes('צ׳ימיצ׳ורי')
+          ? ['פטרוזיליה קצוצה', 'שום', 'שמן זית', 'לימון או חומץ', 'מלח ופלפל']
+          : ['בסיס רוטב לפי הטעם', 'משהו חומצי', 'מלח', 'מעט חריפות או מתיקות'],
+        steps: ['מערבבים את הרכיבים.', 'טועמים ומאזנים מלח, חמיצות ומתיקות.', 'מגישים לצד הבשר.'],
+      };
+    }
+
+    return sauce;
+  });
+}
+
 function cleanExpertText(value: string) {
   const cleaned = value
     .replace(/^#{1,6}\s*/gm, '')
@@ -325,6 +396,7 @@ const styles = StyleSheet.create({
     borderRadius: 14,
     backgroundColor: '#120B08',
     padding: 12,
+    justifyContent: 'flex-end',
   },
   compactRow: {
     backgroundColor: '#1A100C',
@@ -339,9 +411,51 @@ const styles = StyleSheet.create({
   },
   itemText: {
     flex: 1,
+    minWidth: 0,
     color: smokeColors.text,
     fontSize: 15,
     lineHeight: 23,
+    ...rtlText,
+  },
+  infoCard: {
+    gap: 8,
+    borderRadius: 16,
+    borderWidth: 1,
+    borderColor: smokeColors.border,
+    backgroundColor: '#120B08',
+    padding: 13,
+  },
+  infoCardOpen: {
+    borderColor: smokeColors.gold,
+  },
+  infoHeader: {
+    ...rtlRow,
+    alignItems: 'center',
+    gap: 10,
+  },
+  infoIcon: {
+    width: 28,
+    height: 28,
+    overflow: 'hidden',
+    borderRadius: 14,
+    backgroundColor: smokeColors.gold,
+    color: smokeColors.black,
+    fontSize: 18,
+    fontWeight: '900',
+    lineHeight: 28,
+    textAlign: 'center',
+  },
+  infoTitle: {
+    flex: 1,
+    color: smokeColors.gold,
+    fontSize: 18,
+    fontWeight: '900',
+    ...rtlText,
+  },
+  infoDescription: {
+    color: smokeColors.muted,
+    fontSize: 15,
+    lineHeight: 22,
     ...rtlText,
   },
   sideCard: {
