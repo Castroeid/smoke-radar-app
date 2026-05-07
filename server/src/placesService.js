@@ -2,6 +2,7 @@ import { butchers } from './mockData.js';
 
 const nearbySearchUrl = 'https://maps.googleapis.com/maps/api/place/nearbysearch/json';
 const textSearchUrl = 'https://maps.googleapis.com/maps/api/place/textsearch/json';
+const newTextSearchUrl = 'https://places.googleapis.com/v1/places:searchText';
 const defaultLocation = { lat: 32.0853, lng: 34.7818 };
 
 export async function findButchersWithPlaces({ lat, lng } = {}) {
@@ -15,6 +16,11 @@ export async function findButchersWithPlaces({ lat, lng } = {}) {
   };
 
   try {
+    const newTextResults = await searchNewTextButchers(location);
+    if (newTextResults.length > 0) {
+      return newTextResults;
+    }
+
     const nearbyResults = await searchNearbyButchers(location);
     if (nearbyResults.length > 0) {
       return nearbyResults;
@@ -30,6 +36,45 @@ export async function findButchersWithPlaces({ lat, lng } = {}) {
     console.warn('Falling back to mock butchers:', error.message);
     return markFallbackButchers('החיבור ל-Google Places נכשל זמנית.');
   }
+}
+
+async function searchNewTextButchers(location) {
+  const response = await fetch(newTextSearchUrl, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'X-Goog-Api-Key': process.env.GOOGLE_PLACES_API_KEY,
+      'X-Goog-FieldMask':
+        'places.id,places.displayName,places.formattedAddress,places.location,places.rating,places.userRatingCount,places.googleMapsUri',
+    },
+    body: JSON.stringify({
+      textQuery: 'קצביה בשר',
+      languageCode: 'he',
+      regionCode: 'IL',
+      rankPreference: 'DISTANCE',
+      locationBias: {
+        circle: {
+          center: {
+            latitude: location.lat,
+            longitude: location.lng,
+          },
+          radius: 25000,
+        },
+      },
+    }),
+  });
+
+  const data = await response.json().catch(() => ({}));
+
+  if (!response.ok) {
+    console.warn('Google Places New text search failed:', response.status, data.error?.message ?? '');
+    return [];
+  }
+
+  return (data.places ?? [])
+    .map((place) => mapNewPlaceToButcher(place, location))
+    .sort((first, second) => (first.distanceMeters ?? Infinity) - (second.distanceMeters ?? Infinity))
+    .slice(0, 8);
 }
 
 async function searchNearbyButchers(location) {
@@ -73,6 +118,22 @@ async function fetchPlaces(url, location, searchType) {
     .slice(0, 8);
 }
 
+function mapNewPlaceToButcher(place, location) {
+  const placeLocation = place.location ? { lat: place.location.latitude, lng: place.location.longitude } : undefined;
+  const distanceMeters = placeLocation ? calculateDistanceMeters(location, placeLocation) : undefined;
+
+  return {
+    id: place.id,
+    name: place.displayName?.text ?? 'קצבייה',
+    rating: place.rating ? String(place.rating) : 'חדש',
+    address: place.formattedAddress ?? 'כתובת לא זמינה',
+    reviewHighlight: buildReviewHighlight({ user_ratings_total: place.userRatingCount }, distanceMeters, 'new-text'),
+    mapsUrl: place.googleMapsUri ?? `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(place.displayName?.text ?? 'קצביה')}`,
+    source: 'google',
+    distanceMeters,
+  };
+}
+
 function mapPlaceToButcher(place, location, searchType) {
   const placeLocation = place.geometry?.location;
   const distanceMeters = placeLocation ? calculateDistanceMeters(location, placeLocation) : undefined;
@@ -92,7 +153,12 @@ function mapPlaceToButcher(place, location, searchType) {
 function buildReviewHighlight(place, distanceMeters, searchType) {
   const distanceText = distanceMeters ? `כ-${formatDistance(distanceMeters)} מהמיקום שלכם. ` : '';
   const ratingText = place.user_ratings_total ? `${place.user_ratings_total} דירוגים ב-Google Places. ` : '';
-  const searchText = searchType === 'text' ? 'נמצאה בחיפוש טקסט לפי האזור. ' : '';
+  const searchText =
+    searchType === 'new-text'
+      ? 'נמצאה ב-Places API החדש לפי האזור. '
+      : searchType === 'text'
+        ? 'נמצאה בחיפוש טקסט לפי האזור. '
+        : '';
 
   return `${distanceText}${ratingText}${searchText}מומלץ לבדוק זמינות ונתחים לפני הגעה.`;
 }
