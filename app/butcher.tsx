@@ -22,12 +22,21 @@ export default function ButcherScreen() {
     try {
       const results = await findNearbyButchers(location);
       setItems(results);
+      if (location) {
+        const hasGoogleResults = results.some((item) => item.source === 'google');
+        setLocationStatus(
+          hasGoogleResults
+            ? `נמצא מיקום: ${formatLocation(location)}. מוצגות תוצאות אמיתיות מ-Google Places.`
+            : `נמצא מיקום: ${formatLocation(location)}, אבל Google Places לא החזיר קצביות אמיתיות. מוצגות תוצאות ברירת מחדל.`
+        );
+      }
     } finally {
       setLoading(false);
     }
   }, []);
 
   const findNearMe = useCallback(async () => {
+    setLoading(true);
     setLocationStatus('מבקשים מיקום ומחפשים קצביות קרובות...');
     const result = await requestUserLocation();
 
@@ -36,14 +45,18 @@ export default function ButcherScreen() {
         result.reason === 'services-disabled'
           ? 'שירותי המיקום כבויים בטלפון. הפעילו Location במכשיר ונסו שוב.'
           : result.reason === 'permission-denied' && result.canAskAgain === false
-            ? 'הרשאת המיקום חסומה ל-Expo Go. פתחו הגדרות ואפשרו Location.'
-            : 'לא התקבלה הרשאת מיקום. לחצו שוב ואשרו מיקום, או בדקו הרשאות בטלפון.';
+          ? 'הרשאת המיקום חסומה ל-Expo Go. פתחו הגדרות ואפשרו Location.'
+          : result.reason === 'location-timeout'
+            ? 'המכשיר לא הספיק להחזיר מיקום. נסו לצאת החוצה רגע או להפעיל דיוק מיקום גבוה.'
+            : result.reason === 'position-unavailable'
+              ? 'המכשיר לא החזיר מיקום זמין כרגע.'
+          : 'לא התקבלה הרשאת מיקום. לחצו שוב ואשרו מיקום, או בדקו הרשאות בטלפון.';
       setLocationStatus(`${message} בינתיים מוצגות תוצאות ברירת מחדל.`);
       await loadButchers(null);
       return;
     }
 
-    setLocationStatus('מציגים קצביות לפי המיקום הנוכחי שלכם.');
+    setLocationStatus(`נמצא מיקום: ${formatLocation(result.location)}. מחפשים ב-Google Places...`);
     await loadButchers(result.location);
   }, [loadButchers]);
 
@@ -73,6 +86,7 @@ export default function ButcherScreen() {
               <Text style={styles.rating}>★ {item.rating}</Text>
             </View>
             <Text style={styles.address}>{item.address}</Text>
+            {item.distanceMeters ? <Text style={styles.distance}>{formatDistance(item.distanceMeters)}</Text> : null}
             <Text style={styles.review}>{item.reviewHighlight}</Text>
             <AppButton
               title="פתחו מפה"
@@ -136,4 +150,22 @@ const styles = StyleSheet.create({
     lineHeight: 23,
     ...rtlText,
   },
+  distance: {
+    color: smokeColors.gold,
+    fontSize: 14,
+    fontWeight: '900',
+    ...rtlText,
+  },
 });
+
+function formatLocation(location: UserLocation) {
+  return `קו רוחב ${location.lat.toFixed(4)} | קו אורך ${location.lng.toFixed(4)}`;
+}
+
+function formatDistance(distanceMeters: number) {
+  if (distanceMeters < 1000) {
+    return `כ-${distanceMeters} מטר ממך`;
+  }
+
+  return `כ-${(distanceMeters / 1000).toFixed(1)} ק״מ ממך`;
+}

@@ -51,4 +51,6 @@ export type Butcher = {
   address: string;
   reviewHighlight: string;
   mapsUrl?: string;
+  source?: 'google' | 'fallback';
+  distanceMeters?: number;
 };
