@@ -1,7 +1,10 @@
+import { Image } from 'expo-image';
 import { useEffect, useRef } from 'react';
 import { Animated, Easing, StyleSheet, Text, View } from 'react-native';
 
 import { centerText, smokeColors } from '@/constants/smokeTheme';
+
+const thermometerMeat = require('../assets/images/smoke-thermometer-meat.jpg');
 
 type SmokePulseProps = {
   label?: string;
@@ -9,71 +12,91 @@ type SmokePulseProps = {
 
 export function SmokePulse({ label = 'בודק טמפרטורה...' }: SmokePulseProps) {
   const heat = useRef(new Animated.Value(0)).current;
-  const glow = useRef(new Animated.Value(0)).current;
+  const breathe = useRef(new Animated.Value(0)).current;
+  const smoke = useRef(new Animated.Value(0)).current;
 
   useEffect(() => {
     const heatLoop = Animated.loop(
       Animated.sequence([
         Animated.timing(heat, {
           toValue: 1,
-          duration: 1500,
+          duration: 1800,
           easing: Easing.out(Easing.cubic),
           useNativeDriver: false,
         }),
-        Animated.delay(520),
+        Animated.delay(720),
         Animated.timing(heat, {
-          toValue: 0.7,
-          duration: 720,
+          toValue: 0.76,
+          duration: 760,
           easing: Easing.inOut(Easing.quad),
           useNativeDriver: false,
         }),
-        Animated.delay(420),
+        Animated.delay(460),
         Animated.timing(heat, {
-          toValue: 0.2,
-          duration: 680,
+          toValue: 0.18,
+          duration: 800,
           easing: Easing.in(Easing.quad),
           useNativeDriver: false,
         }),
       ])
     );
 
-    const glowLoop = Animated.loop(
+    const breatheLoop = Animated.loop(
       Animated.sequence([
-        Animated.timing(glow, { toValue: 1, duration: 900, useNativeDriver: true }),
-        Animated.timing(glow, { toValue: 0, duration: 900, useNativeDriver: true }),
+        Animated.timing(breathe, { toValue: 1, duration: 1350, easing: Easing.inOut(Easing.quad), useNativeDriver: true }),
+        Animated.timing(breathe, { toValue: 0, duration: 1350, easing: Easing.inOut(Easing.quad), useNativeDriver: true }),
       ])
     );
 
+    const smokeLoop = Animated.loop(
+      Animated.timing(smoke, {
+        toValue: 1,
+        duration: 2600,
+        easing: Easing.inOut(Easing.sin),
+        useNativeDriver: true,
+      })
+    );
+
     heatLoop.start();
-    glowLoop.start();
+    breatheLoop.start();
+    smokeLoop.start();
 
     return () => {
       heatLoop.stop();
-      glowLoop.stop();
+      breatheLoop.stop();
+      smokeLoop.stop();
     };
-  }, [glow, heat]);
+  }, [breathe, heat, smoke]);
 
-  const fillWidth = heat.interpolate({ inputRange: [0, 1], outputRange: ['18%', '84%'] });
-  const glowOpacity = glow.interpolate({ inputRange: [0, 1], outputRange: [0.2, 0.75] });
-  const meatScale = glow.interpolate({ inputRange: [0, 1], outputRange: [0.98, 1.02] });
+  const fillWidth = heat.interpolate({ inputRange: [0, 1], outputRange: [22, 124] });
+  const glowOpacity = breathe.interpolate({ inputRange: [0, 1], outputRange: [0.18, 0.48] });
+  const glowScale = breathe.interpolate({ inputRange: [0, 1], outputRange: [0.96, 1.05] });
+  const smokeLift = smoke.interpolate({ inputRange: [0, 1], outputRange: [12, -18] });
+  const smokeOpacity = smoke.interpolate({ inputRange: [0, 0.45, 1], outputRange: [0, 0.28, 0] });
 
   return (
     <View style={styles.wrap}>
-      <Animated.View style={[styles.meat, { transform: [{ scale: meatScale }] }]}>
-        <Animated.View style={[styles.heatGlow, { opacity: glowOpacity }]} />
-        <View style={styles.fatLine} />
-        <View style={styles.searLineOne} />
-        <View style={styles.searLineTwo} />
-        <View style={styles.probe}>
-          <View style={styles.probeTip} />
-          <View style={styles.thermometerTrack}>
-            <Animated.View style={[styles.thermometerFill, { width: fillWidth }]} />
+      <View style={styles.visual}>
+        <Image source={thermometerMeat} style={StyleSheet.absoluteFill} contentFit="cover" cachePolicy="memory-disk" />
+        <View style={styles.photoShade} />
+        <Animated.View style={[styles.heatGlow, { opacity: glowOpacity, transform: [{ scale: glowScale }] }]} />
+        <Animated.View
+          style={[styles.smokeWisp, styles.smokeOne, { opacity: smokeOpacity, transform: [{ translateY: smokeLift }, { rotate: '-14deg' }] }]}
+        />
+        <Animated.View
+          style={[styles.smokeWisp, styles.smokeTwo, { opacity: smokeOpacity, transform: [{ translateY: smokeLift }, { rotate: '14deg' }] }]}
+        />
+
+        <View style={styles.tempPanel}>
+          <View style={styles.tempTop}>
+            <Text style={styles.tempNumber}>72°</Text>
+            <Text style={styles.tempCaption}>מתייצב</Text>
           </View>
-          <View style={styles.probeCap}>
-            <Text style={styles.tempText}>72°</Text>
+          <View style={styles.tempTrack}>
+            <Animated.View style={[styles.tempFill, { width: fillWidth }]} />
           </View>
         </View>
-      </Animated.View>
+      </View>
       {label ? <Text style={styles.label}>{label}</Text> : null}
     </View>
   );
@@ -84,103 +107,90 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     gap: 12,
-    paddingVertical: 18,
+    paddingVertical: 16,
   },
-  meat: {
-    width: 178,
-    height: 116,
-    justifyContent: 'center',
-    borderRadius: 58,
-    borderWidth: 2,
-    borderColor: '#5C2317',
-    backgroundColor: '#2A0E08',
+  visual: {
+    width: 232,
+    height: 146,
     overflow: 'hidden',
-    shadowColor: smokeColors.ember,
-    shadowOpacity: 0.32,
+    borderRadius: 28,
+    borderWidth: 1,
+    borderColor: '#3C241A',
+    backgroundColor: '#0C0806',
+    shadowColor: smokeColors.orange,
+    shadowOpacity: 0.18,
     shadowRadius: 18,
-    shadowOffset: { width: 0, height: 0 },
+    shadowOffset: { width: 0, height: 8 },
+  },
+  photoShade: {
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: 'rgba(0, 0, 0, 0.32)',
   },
   heatGlow: {
     position: 'absolute',
     right: 18,
-    top: 18,
-    width: 110,
+    bottom: 10,
+    width: 168,
     height: 72,
-    borderRadius: 46,
-    backgroundColor: 'rgba(255, 122, 26, 0.22)',
+    borderRadius: 56,
+    backgroundColor: 'rgba(255, 104, 20, 0.34)',
   },
-  fatLine: {
+  smokeWisp: {
     position: 'absolute',
-    right: 22,
+    width: 58,
+    height: 108,
+    borderRadius: 44,
+    borderWidth: 1,
+    borderColor: 'rgba(255, 247, 240, 0.18)',
+  },
+  smokeOne: {
+    top: 18,
+    left: 34,
+  },
+  smokeTwo: {
     top: 22,
-    width: 118,
-    height: 12,
-    borderRadius: 10,
-    backgroundColor: 'rgba(255, 193, 102, 0.28)',
-    transform: [{ rotate: '-7deg' }],
+    right: 34,
   },
-  searLineOne: {
+  tempPanel: {
     position: 'absolute',
-    right: 42,
-    bottom: 26,
-    width: 86,
-    height: 5,
-    borderRadius: 8,
-    backgroundColor: 'rgba(12, 5, 3, 0.7)',
-    transform: [{ rotate: '13deg' }],
+    right: 16,
+    bottom: 14,
+    width: 154,
+    gap: 8,
+    borderRadius: 18,
+    borderWidth: 1,
+    borderColor: 'rgba(255, 193, 102, 0.3)',
+    backgroundColor: 'rgba(8, 6, 5, 0.72)',
+    padding: 11,
   },
-  searLineTwo: {
-    position: 'absolute',
-    right: 52,
-    bottom: 45,
-    width: 74,
-    height: 5,
-    borderRadius: 8,
-    backgroundColor: 'rgba(12, 5, 3, 0.58)',
-    transform: [{ rotate: '13deg' }],
-  },
-  probe: {
+  tempTop: {
     flexDirection: 'row-reverse',
-    alignItems: 'center',
-    justifyContent: 'center',
-    paddingHorizontal: 18,
+    alignItems: 'baseline',
+    justifyContent: 'space-between',
   },
-  probeTip: {
-    width: 28,
-    height: 4,
-    borderRadius: 4,
-    backgroundColor: '#D9D2C8',
+  tempNumber: {
+    color: smokeColors.gold,
+    fontSize: 24,
+    fontWeight: '900',
+    letterSpacing: 0,
   },
-  thermometerTrack: {
-    width: 92,
-    height: 14,
-    justifyContent: 'center',
+  tempCaption: {
+    color: smokeColors.muted,
+    fontSize: 12,
+    fontWeight: '900',
+    ...centerText,
+  },
+  tempTrack: {
+    width: '100%',
+    height: 7,
     overflow: 'hidden',
     borderRadius: 999,
-    borderWidth: 2,
-    borderColor: '#D9D2C8',
-    backgroundColor: '#170A06',
+    backgroundColor: 'rgba(255, 247, 240, 0.16)',
   },
-  thermometerFill: {
+  tempFill: {
     height: '100%',
     borderRadius: 999,
     backgroundColor: smokeColors.orange,
-  },
-  probeCap: {
-    minWidth: 42,
-    height: 42,
-    alignItems: 'center',
-    justifyContent: 'center',
-    borderRadius: 21,
-    borderWidth: 2,
-    borderColor: '#D9D2C8',
-    backgroundColor: smokeColors.gold,
-  },
-  tempText: {
-    color: smokeColors.black,
-    fontSize: 13,
-    fontWeight: '900',
-    ...centerText,
   },
   label: {
     color: smokeColors.gold,
