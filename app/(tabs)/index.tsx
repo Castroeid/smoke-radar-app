@@ -30,7 +30,7 @@ export default function HomeScreen() {
       <View style={styles.top}>
         <Text style={styles.logo}>SMOKE RADAR</Text>
         <SmokeImage source={smokeImages.hero} height={150} />
-        <SmokePulse label="מייצב טמפרטורה..." />
+        <SmokePulse captions={['סורק טרנדים חמים', 'מזהה נתחים מעולים', 'פותח מסלול לטעם הבא']} />
       </View>
 
       <View style={styles.copy}>

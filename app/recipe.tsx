@@ -53,7 +53,13 @@ export default function RecipeScreen() {
       />
 
       <SmokeImage source={smokeImages.choiceCuts} height={140} />
-      <SmokePulse label={loading ? 'מעיר את הפיטמאסטר...' : 'מייצב טמפרטורה לפי הנתח'} />
+      <SmokePulse
+        captions={
+          loading
+            ? ['מעיר את הפיטמאסטר', 'בודק את הנתח שבחרתם', 'מרכיב מתכון לפי השיטה', 'מסיים כמויות וטמפרטורות']
+            : ['סורק את הנתח', 'מתאים שיטת בישול', 'מחשב תיבול וזמנים']
+        }
+      />
 
       <View style={styles.progress}>
         {[1, 2, 3, 4, 5].map((item) => (
