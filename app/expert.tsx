@@ -61,7 +61,7 @@ export default function ExpertScreen() {
           <Text style={styles.contextValue}>{selectedCut}</Text>
         </View>
         {error ? <Text style={styles.error}>{error}</Text> : null}
-        <AppButton title={loading ? 'מכין תשובה...' : 'שלחו שאלה'} onPress={submit} />
+        <AppButton title={loading ? 'מעיר את הפיטמאסטר...' : 'שלחו שאלה'} onPress={submit} />
       </AppCard>
     </AppScreen>
   );

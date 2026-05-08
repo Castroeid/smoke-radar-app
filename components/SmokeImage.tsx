@@ -1,8 +1,8 @@
-import { Image } from 'expo-image';
+import { Image, type ImageSource } from 'expo-image';
 import { StyleSheet, View } from 'react-native';
 
 type SmokeImageProps = {
-  source: string;
+  source: ImageSource | string | number | ImageSource[] | string[] | null;
   height?: number;
 };
 

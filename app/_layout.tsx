@@ -29,7 +29,11 @@ export default function RootLayout() {
       document.body.dir = 'rtl';
     }
 
-    void Promise.all(Object.values(smokeImages).map((source) => Image.prefetch(source, 'disk')));
+    void Promise.all(
+      Object.values(smokeImages)
+        .filter((source): source is string => typeof source === 'string')
+        .map((source) => Image.prefetch(source, 'disk'))
+    );
   }, []);
 
   return (

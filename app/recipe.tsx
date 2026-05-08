@@ -53,7 +53,7 @@ export default function RecipeScreen() {
       />
 
       <SmokeImage source={smokeImages.recipe} height={140} />
-      <SmokePulse label={loading ? 'מחולל מתכון מותאם...' : 'הרדאר מתאים נתח, שיטה ותיבול'} />
+      <SmokePulse label={loading ? 'מעיר את הפיטמאסטר...' : 'הרדאר מתאים נתח, שיטה ותיבול'} />
 
       <View style={styles.progress}>
         {[1, 2, 3, 4, 5].map((item) => (
@@ -113,7 +113,7 @@ export default function RecipeScreen() {
           onSelect={setEffort}
           onBack={() => setStep(4)}
           onNext={generate}
-          nextTitle={loading ? 'מחולל מתכון...' : 'חוללו מתכון'}
+          nextTitle={loading ? 'מעיר את הפיטמאסטר...' : 'חוללו מתכון'}
           error={error}
         />
       ) : null}
