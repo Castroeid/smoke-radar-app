@@ -97,6 +97,8 @@ function shareShoppingList(items: { ingredients: string[]; sauces: string[] }) {
     message.push('', 'רטבים:', ...items.sauces.map((item) => `• ${item}`));
   }
 
+  message.push('', 'חזרה מהירה למתכון באפליקציה:', 'smokeradarapp://my-recipes');
+
   const encoded = encodeURIComponent(message.join('\n'));
   Linking.openURL(`https://wa.me/?text=${encoded}`);
 }
@@ -163,7 +165,7 @@ const styles = StyleSheet.create({
     minHeight: 48,
     ...rtlRow,
     alignItems: 'center',
-    justifyContent: 'flex-end',
+    justifyContent: 'flex-start',
     gap: 10,
     borderRadius: 14,
     backgroundColor: '#120B08',
@@ -193,6 +195,7 @@ const styles = StyleSheet.create({
     color: smokeColors.text,
     fontSize: 16,
     lineHeight: 23,
+    alignSelf: 'stretch',
     ...rtlText,
   },
   itemDone: {

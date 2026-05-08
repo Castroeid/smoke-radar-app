@@ -22,7 +22,7 @@ export default function SelectionScreen() {
     <AppScreen style={styles.screen}>
       <SectionTitle title="מה תרצו לעשות?" subtitle={`בחרתם: ${selectedCut}`} />
 
-      <SmokeImage source={smokeImages.fire} height={120} />
+      <SmokeImage source={smokeImages.choiceCuts} height={120} />
 
       <AppCard style={styles.cutCard}>
         <Text style={styles.cutLabel}>המסלול הבא שלכם</Text>
@@ -45,7 +45,7 @@ export default function SelectionScreen() {
       <View style={styles.actions}>
         <AppButton title="לחולל מתכון" onPress={() => router.push({ pathname: '/recipe', params: { meat: selectedCut } })} />
         <AppButton
-          title="לשאול את המומחה"
+          title="לשאול את הפיטמאסטר"
           variant="secondary"
           onPress={() => router.push({ pathname: '/expert', params: { meat: selectedCut } })}
         />

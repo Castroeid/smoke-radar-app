@@ -30,7 +30,7 @@ export default function HomeScreen() {
       <View style={styles.top}>
         <Text style={styles.logo}>SMOKE RADAR</Text>
         <SmokeImage source={smokeImages.hero} height={150} />
-        <SmokePulse label="רדאר מתחמם..." />
+        <SmokePulse label="מייצב טמפרטורה..." />
       </View>
 
       <View style={styles.copy}>
@@ -39,7 +39,7 @@ export default function HomeScreen() {
       </View>
 
       <AppCard style={styles.startCard}>
-        <Text style={styles.cardText}>סרקו טרנדים, בחרו מנה, וקבלו מסלול מהיר למתכון, מומחה או קצבייה.</Text>
+        <Text style={styles.cardText}>סרקו טרנדים, בחרו מנה, וקבלו מסלול מהיר למתכון, פיטמאסטר או קצבייה.</Text>
         <AppButton title="התחילו" onPress={() => router.push('/radar')} />
         <AppButton title="המתכונים שלי" variant="secondary" onPress={() => router.push('/my-recipes' as never)} />
       </AppCard>

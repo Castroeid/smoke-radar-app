@@ -17,7 +17,7 @@ type ResultSource = 'recipe' | 'expert';
 export default function ResultScreen() {
   const { source, payload, meat } = useLocalSearchParams<{ source?: ResultSource; payload?: string; meat?: string }>();
   const selectedCut = typeof meat === 'string' && meat.length > 0 ? meat : 'המנה';
-  const title = source === 'recipe' ? 'המתכון שלכם מוכן' : 'תשובה מהמומחה';
+  const title = source === 'recipe' ? 'המתכון שלכם מוכן' : 'תשובה מהפיטמאסטר';
 
   const shareResult = async () => {
     await Share.share({ message: `Smoke Radar: ${title}` });
@@ -41,12 +41,13 @@ export default function ResultScreen() {
   };
 
   const parsedPayload = useMemo(() => parsePayload(payload), [payload]);
+  const heroImage = getResultImage(source, parsedPayload, selectedCut);
   const [saveState, setSaveState] = useState('');
 
   return (
     <AppScreen>
       <SectionTitle title={title} subtitle="אפשר להמשיך לרשימת קניות, לשתף או לחזור לרדאר." />
-      <SmokeImage source={source === 'expert' ? smokeImages.expert : smokeImages.result} height={135} />
+      <SmokeImage source={heroImage} height={135} />
 
       {source === 'recipe' && parsedPayload ? <RecipeView recipe={parsedPayload as RecipeResult} /> : null}
       {source === 'expert' && parsedPayload ? <ExpertView answer={parsedPayload as ExpertAnswer} /> : null}
@@ -111,9 +112,40 @@ function formatRecipeForShare(recipe: RecipeResult) {
       `  רכיבים: ${sauce.ingredients.map(cleanInlineText).join(', ')}`,
       ...sauce.steps.map((step, index) => `  ${index + 1}. ${cleanInlineText(step)}`),
     ]),
+    '',
+    'חזרה מהירה לאפליקציה:',
+    'smokeradarapp://my-recipes',
   ];
 
   return lines.join('\n');
+}
+
+function getResultImage(source: ResultSource | undefined, payload: unknown, selectedCut: string) {
+  if (source === 'expert') {
+    return smokeImages.expert;
+  }
+
+  const recipe = payload as Partial<RecipeResult> | null;
+  const text = [
+    selectedCut,
+    recipe?.title,
+    recipe?.prepTime,
+    ...(recipe?.methodGuide ?? []),
+    ...(recipe?.steps ?? []),
+  ]
+    .filter(Boolean)
+    .join(' ')
+    .toLowerCase();
+
+  if (text.includes('קדירה') || text.includes('סיר') || text.includes('תבשיל') || text.includes('braise')) {
+    return smokeImages.stewResult;
+  }
+
+  if (text.includes('אסאדו') || text.includes('asado') || text.includes('שורט') || text.includes('ריבס')) {
+    return smokeImages.asadoResult;
+  }
+
+  return smokeImages.result;
 }
 
 function RecipeView({ recipe }: { recipe: RecipeResult }) {
@@ -399,7 +431,7 @@ const styles = StyleSheet.create({
     borderRadius: 14,
     backgroundColor: '#120B08',
     padding: 12,
-    justifyContent: 'flex-end',
+    justifyContent: 'flex-start',
   },
   compactRow: {
     backgroundColor: '#1A100C',
@@ -418,6 +450,7 @@ const styles = StyleSheet.create({
     color: smokeColors.text,
     fontSize: 15,
     lineHeight: 23,
+    alignSelf: 'stretch',
     ...rtlText,
   },
   infoCard: {

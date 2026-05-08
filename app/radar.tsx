@@ -77,7 +77,7 @@ export default function RadarScreen() {
       </View>
 
       <AppButton title="בחרו מנה" onPress={continueToActions} />
-      <AppButton title="אני יודע מה אני רוצה" variant="secondary" onPress={continueWithoutTrend} />
+      <AppButton title="תנו לי לבחור את הנתח" variant="secondary" onPress={continueWithoutTrend} />
     </AppScreen>
   );
 }

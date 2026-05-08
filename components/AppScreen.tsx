@@ -36,6 +36,6 @@ const styles = StyleSheet.create({
     ...rtlContent,
     gap: 18,
     padding: screenPadding,
-    paddingBottom: 104,
+    paddingBottom: 148,
   },
 });

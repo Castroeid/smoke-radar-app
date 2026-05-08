@@ -15,6 +15,7 @@ export function SmokeImage({ source, height = 180 }: SmokeImageProps) {
         contentFit="cover"
         transition={260}
         cachePolicy="disk"
+        priority="high"
         placeholder={{ blurhash: 'L25O6[0L4T~W4TMyx[t7M{Rj00IV' }}
       />
       <View style={styles.overlay} />

@@ -37,7 +37,7 @@ export default function ExpertScreen() {
   return (
     <AppScreen>
       <SectionTitle
-        eyebrow="שאל את המומחה"
+        eyebrow="שאל את הפיטמאסטר"
         title="שאלה מהירה על בשר, אש ועשן"
         subtitle="תשובה קצרה ומעשית בסגנון פיטמאסטר: חום, זמן, מרקם וטעות אחת שכדאי לא לעשות."
       />

@@ -2,7 +2,7 @@ import { buildExpertAnswer, buildRecipe } from './mockData.js';
 import { createOpenAiResponse, hasOpenAiKey } from './openaiClient.js';
 
 const expertInstructions = `
-אתה מומחה בשר, גריל ומעשנה עבור אפליקציית Smoke Radar.
+אתה פיטמאסטר ומומחה בשר, גריל ומעשנה עבור אפליקציית Smoke Radar.
 ענה בעברית בלבד, בצורה קצרה, מעשית, בטוחה וברורה.
 אל תשתמש ב-Markdown: בלי כותרות ##, בלי הדגשות **, בלי טבלאות ובלי רשימות Markdown.
 כתוב 2-4 פסקאות קצרות בטקסט נקי שמתאים לתצוגה באפליקציה.

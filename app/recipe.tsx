@@ -16,7 +16,7 @@ import { generateRecipe } from '@/services/smokeRadarService';
 const methods = ['מעשנה', 'מנגל ישראלי', 'גריל פחמים', 'סיר קדירה', 'תנור ביתי', 'פלנצ׳ה', 'בישול ארוך בתנור'];
 const efforts = ['מהיר', 'מאוזן', 'מושקע'];
 const kosherOptions = ['כשר', 'לא כשר'];
-const seasoningStyles = ['קלאסי', 'ישראלי', 'מעושן עמוק', 'חריף', 'עשבי תיבול', 'אסייתי'];
+const seasoningStyles = ['קלאסי', 'ישראלי', 'מתוק מעושן', 'מתקתק', 'מעושן עמוק', 'חריף', 'עשבי תיבול', 'אסייתי'];
 
 export default function RecipeScreen() {
   const { meat } = useLocalSearchParams<{ meat?: string }>();
@@ -52,8 +52,8 @@ export default function RecipeScreen() {
         subtitle={`הנתח שנבחר: ${selectedCut}`}
       />
 
-      <SmokeImage source={smokeImages.recipe} height={140} />
-      <SmokePulse label={loading ? 'מעיר את הפיטמאסטר...' : 'הרדאר מתאים נתח, שיטה ותיבול'} />
+      <SmokeImage source={smokeImages.choiceCuts} height={140} />
+      <SmokePulse label={loading ? 'מעיר את הפיטמאסטר...' : 'מייצב טמפרטורה לפי הנתח'} />
 
       <View style={styles.progress}>
         {[1, 2, 3, 4, 5].map((item) => (

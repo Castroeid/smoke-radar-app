@@ -53,7 +53,7 @@ export default function RootLayout() {
         <Stack.Screen name="radar" options={{ title: 'רדאר הבשרים' }} />
         <Stack.Screen name="selection" options={{ title: 'מה תרצו לעשות?' }} />
         <Stack.Screen name="recipe" options={{ title: 'מחולל מתכונים' }} />
-        <Stack.Screen name="expert" options={{ title: 'שאל את המומחה' }} />
+        <Stack.Screen name="expert" options={{ title: 'שאל את הפיטמאסטר' }} />
         <Stack.Screen name="butcher" options={{ title: 'קצביות קרובות' }} />
         <Stack.Screen name="result" options={{ title: 'תוצאה' }} />
         <Stack.Screen name="shopping" options={{ title: 'רשימת קניות' }} />
