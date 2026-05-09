@@ -17,6 +17,25 @@ const methods = ['מעשנה', 'מנגל ישראלי', 'גריל פחמים', '
 const efforts = ['מהיר', 'מאוזן', 'מושקע'];
 const kosherOptions = ['כשר', 'לא כשר'];
 const seasoningStyles = ['קלאסי', 'ישראלי', 'מתוק מעושן', 'מתקתק', 'מעושן עמוק', 'חריף', 'עשבי תיבול', 'אסייתי'];
+const methodDescriptions: Record<string, string> = {
+  מעשנה: 'חום עקיף נמוך עם עשן עדין. מתאים לנתחים שצריכים זמן, צבע ורכות.',
+  'מנגל ישראלי': 'רשת פתוחה מעל גחלים. עבודה מהירה יחסית עם אזור חם ואזור רגוע, כמו מנגל ביתי.',
+  'גריל פחמים': 'שליטה מדויקת יותר עם גחלים, מכסה ואזורים. טוב גם לנתחים עבים שצריכים סיום עקיף.',
+  'סיר קדירה': 'צריבה ואז בישול איטי בנוזלים עד רכות. מתאים לאסאדו, אונטריב ונתחים סיביים.',
+  'תנור ביתי': 'בישול יציב ונוח בבית, עם צריבה לפני או אחרי לפי הנתח.',
+  'פלנצ׳ה': 'משטח חם לצריבה מהירה. מתאים לנתחים דקים, פרגית וסטייקים קצרים.',
+  'בישול ארוך בתנור': 'חום נמוך לאורך זמן, לריכוך נתח גדול בלי מעשנה.',
+};
+const seasoningDescriptions: Record<string, string> = {
+  קלאסי: 'מלח, פלפל, שום ומעט שמן. נותן לנתח לדבר.',
+  ישראלי: 'שמן זית, לימון, שום, פפריקה, כמון/בהרט ועשבי תיבול.',
+  'מתוק מעושן': 'פפריקה מעושנת וסילאן בכמות מדויקת, עם זהירות מסוכר על אש גבוהה.',
+  מתקתק: 'סילאן או דבש במידה, מתאים במיוחד לגלייז וסיום.',
+  'מעושן עמוק': 'פפריקה מעושנת, פלפל ושום לטעם עמוק גם בלי הרבה רוטב.',
+  חריף: 'אריסה, צ׳ילי או פלפל חריף עם איזון חמיצות.',
+  'עשבי תיבול': 'רוזמרין, טימין, פטרוזיליה או כוסברה לפי הנתח.',
+  אסייתי: 'סויה, ג׳ינג׳ר, שום, שומשום וצ׳ילי.',
+};
 
 export default function RecipeScreen() {
   const { meat } = useLocalSearchParams<{ meat?: string }>();
@@ -86,6 +105,7 @@ export default function RecipeScreen() {
           onSelect={setMethod}
           onBack={() => setStep(1)}
           onNext={() => setStep(3)}
+          descriptions={methodDescriptions}
         />
       ) : null}
 
@@ -108,6 +128,7 @@ export default function RecipeScreen() {
           onSelect={setSeasoningStyle}
           onBack={() => setStep(3)}
           onNext={() => setStep(5)}
+          descriptions={seasoningDescriptions}
         />
       ) : null}
 
@@ -136,9 +157,10 @@ type ChoiceStepProps = {
   onNext: () => void;
   nextTitle?: string;
   error?: string;
+  descriptions?: Record<string, string>;
 };
 
-function ChoiceStep({ title, options, value, onSelect, onBack, onNext, nextTitle = 'המשך', error }: ChoiceStepProps) {
+function ChoiceStep({ title, options, value, onSelect, onBack, onNext, nextTitle = 'המשך', error, descriptions }: ChoiceStepProps) {
   return (
     <AppCard>
       <Text style={styles.stepTitle}>{title}</Text>
@@ -153,6 +175,12 @@ function ChoiceStep({ title, options, value, onSelect, onBack, onNext, nextTitle
           );
         })}
       </View>
+      {descriptions?.[value] ? (
+        <View style={styles.descriptionBox}>
+          <Text style={styles.descriptionTitle}>מה זה אומר?</Text>
+          <Text style={styles.descriptionText}>{descriptions[value]}</Text>
+        </View>
+      ) : null}
       {error ? <Text style={styles.error}>{error}</Text> : null}
       <View style={styles.buttonRow}>
         <AppButton title="חזרה" variant="ghost" onPress={onBack} style={styles.rowButton} />
@@ -232,6 +260,24 @@ const styles = StyleSheet.create({
   },
   optionTextSelected: {
     color: smokeColors.text,
+  },
+  descriptionBox: {
+    gap: 5,
+    borderRadius: 16,
+    backgroundColor: '#120B08',
+    padding: 13,
+  },
+  descriptionTitle: {
+    color: smokeColors.gold,
+    fontSize: 14,
+    fontWeight: '900',
+    ...centerBlockText,
+  },
+  descriptionText: {
+    color: smokeColors.muted,
+    fontSize: 14,
+    lineHeight: 21,
+    ...centerBlockText,
   },
   error: {
     color: smokeColors.gold,

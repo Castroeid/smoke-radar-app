@@ -48,7 +48,7 @@ export async function generateMockRecipe(req: RecipeRequest): Promise<RecipeResu
   const isPot = req.method.includes('קדירה');
   const isMangal = req.method.includes('מנגל');
   const isQuick = req.effort === 'מהיר';
-  const kosherNote = req.kosherPreference === 'כשר' ? 'המתכון מותאם לכשרות וללא שילוב חלב ובשר.' : 'אפשר לשלב חמאה, יין או תוספות לא כשרות לפי הטעם.';
+  const kosherNote = req.kosherPreference === 'כשר' ? 'המתכון נשאר כשר וללא שילוב חלב ובשר.' : 'בגרסה לא כשרה אפשר להשתמש ברכיב עשיר רק אם הוא באמת מתאים לשיטה.';
   const style = req.seasoningStyle || 'קלאסי';
   const seed = Math.abs([...`${req.cut}-${req.method}-${style}`].reduce((total, char) => total + char.charCodeAt(0), 0));
   const sideSets = [
@@ -85,7 +85,7 @@ export async function generateMockRecipe(req: RecipeRequest): Promise<RecipeResu
       {
         title: 'פיתה צרובה עם שמן שום',
         description: 'ביס ישראלי פשוט שמתאים למנגל ולרטבים חזקים.',
-        steps: ['מערבבים שמן זית עם שום כתוש ומעט מלח.', 'מורחים על פיתות וצועדים על רשת חמה.', 'חותכים למשולשים ומגישים מיד.'],
+        steps: ['מערבבים שמן זית עם שום כתוש ומעט מלח.', 'מורחים על פיתות וצורבים על רשת חמה.', 'חותכים למשולשים ומגישים מיד.'],
       },
     ],
   ];
@@ -133,8 +133,8 @@ export async function generateMockRecipe(req: RecipeRequest): Promise<RecipeResu
       },
     ],
   ];
-  const selectedSides = sideSets[seed % sideSets.length];
-  const selectedSauces = sauceSets[(seed + req.method.length) % sauceSets.length];
+  const selectedSides = pickSideDishes(cut, req.method, style) ?? sideSets[seed % sideSets.length];
+  const selectedSauces = pickSauces(cut, req.method, req.kosherPreference) ?? sauceSets[(seed + req.method.length) % sauceSets.length];
   const recipeSteps = buildCutAwareSteps(cut, req.method, style, kosherNote);
 
   return {
@@ -142,14 +142,9 @@ export async function generateMockRecipe(req: RecipeRequest): Promise<RecipeResu
     prepTime: isQuick ? '45-60 דקות' : req.effort === 'מאוזן' ? '2-3 שעות' : '5-7 שעות',
     difficulty: isQuick ? 'קל' : req.effort === 'מאוזן' ? 'בינוני' : 'מתקדם',
     ingredients: [
-      `${cut} - 1.2 עד 1.8 ק״ג, לפי מספר הסועדים`,
-      'מלח גס - 18 גרם לכל ק״ג בשר',
-      'פלפל שחור גרוס - 1 כפית',
-      'פפריקה מעושנת - 1 כפית',
-      'שמן זית - 2 כפות',
-      'סוכר חום - 1 כפית, לא חובה',
-      `תיבול בסגנון ${style}`,
-      kosherNote,
+      `${cut} - ${portionForCut(cut)}`,
+      ...buildSeasoningIngredients(style, cut),
+      ...buildMethodIngredients(cut, req.method, req.kosherPreference),
     ],
     methodGuide: isSmoker
       ? [
@@ -191,12 +186,13 @@ export async function generateMockRecipe(req: RecipeRequest): Promise<RecipeResu
 
 function buildCutAwareSteps(cut: string, method: string, style: string, kosherNote: string) {
   const namedCut = withArticle(cut);
+  const seasoningReference = `רכיבי התיבול המפורטים ברשימת המצרכים (${style})`;
 
   if (method.includes('קדירה')) {
     return [
-      `חותכים ירקות שורש גס ומייבשים את ${namedCut}; לא מתייחסים אליו כאל נתח מעושן או צרוב מראש.`,
+      `חותכים ירקות שורש גס ומכינים את ${namedCut} לצריבה; לא מתייחסים אליו כאל נתח מעושן או צרוב מראש.`,
       `צורבים את ${namedCut} בסיר כבד עם מעט שמן עד צבע עמוק מכל הצדדים, ואז מוציאים רגע לצלחת.`,
-      `פותחים את המשקעים עם ציר בקר או מים חמים עד חצי גובה, מוסיפים בצל, שום ותיבול ${style}, ומחזירים את ${namedCut} לסיר.`,
+      `פותחים את המשקעים עם ציר בקר או מים חמים עד חצי גובה, מוסיפים בצל, שום ואת ${seasoningReference}, ומחזירים את ${namedCut} לסיר.`,
       'מכסים ומבשלים על אש נמוכה מאוד או בתנור על 150-160 מעלות במשך 3-4 שעות, עד שהמזלג נכנס כמעט בלי התנגדות.',
       'בודקים פעם בשעה שיש נוזלים. לא הופכים בלי צורך; רק מרטיבים את החלק העליון מהרוטב.',
       `נותנים ל${namedCut} לנוח 15 דקות בתוך הרוטב, ואז מגישים בפרוסות עבות או בנתחים רכים עם הרוטב המצומצם.`,
@@ -221,7 +217,7 @@ function buildCutAwareSteps(cut: string, method: string, style: string, kosherNo
   if (cut.includes('כנפיים')) {
     return [
       'מייבשים את הכנפיים היטב כדי לקבל עור פריך, ומתבלים במלח, פלפל ותיבול יבש.',
-      `מוסיפים קו ${style} בלי להעמיס רוטב בתחילת הצלייה, כדי שהסוכר לא יישרף.`,
+      `מוסיפים את ${seasoningReference} בלי להעמיס רוטב בתחילת הצלייה, כדי שהסוכר לא יישרף.`,
       'צולים על חום בינוני-גבוה 18-25 דקות ומסובבים כל כמה דקות לצריבה אחידה.',
       'רק ב-5 הדקות האחרונות מברישים רוטב ומעבירים לאזור מעט פחות חם.',
       'בודקים שהעור פריך והבשר נפרד בקלות מהעצם; כנפיים לא צריכות מנוחה ארוכה.',
@@ -229,14 +225,144 @@ function buildCutAwareSteps(cut: string, method: string, style: string, kosherNo
     ];
   }
 
+  if (cut.includes('פרגית')) {
+    return [
+      'מסדרים את הפרגית בשכבה אחת ומסירים עודפי שומן גדולים, בלי לפרוס אותה כמו סטייק.',
+      `מערבבים את ${seasoningReference} עם מעט שמן ומעסים את הפרגית 20-30 דקות לפני הצלייה.`,
+      'צולים על חום בינוני-גבוה 4-6 דקות מכל צד, עד צבע יפה ושחרור קל מהרשת.',
+      'מעבירים לדקה-שתיים לאזור רגוע יותר אם המרכז עוד צריך זמן, ושומרים על עסיסיות.',
+      'מגישים כנתחים שלמים, ברצועות או בשיפודים; לא צריך מנוחה ארוכה.',
+      kosherNote,
+    ];
+  }
+
+  const shouldDry =
+    cut.includes('פיקניה') || cut.includes('אנטריקוט') || cut.includes('סינטה') || cut.includes('שייטל') || cut.includes('כנפיים');
+
   return [
-    `מייבשים את ${namedCut} היטב ומורחים שכבה דקה של שמן זית.`,
-    `מערבבים מלח, פלפל, פפריקה וסוכר חום עם קו תיבול ${style}, ומצפים את ${namedCut} מכל הצדדים.`,
+    shouldDry
+      ? `מייבשים את ${namedCut} היטב כדי לקבל צריבה נקייה, ואז מורחים שכבה דקה של שמן זית.`
+      : `מסדרים את ${namedCut} בשכבה נוחה לעבודה ומורחים שכבה דקה של שמן זית לפני התיבול.`,
+    `מערבבים את ${seasoningReference} ומצפים את ${namedCut} מכל הצדדים בכמות אחידה.`,
     `מבשלים את ${namedCut} בשיטת ${method}: עובדים עם חום יציב, בודקים לפי מרקם, ולא הופכים יותר ממה שצריך.`,
     `אם ${namedCut} משחים מהר מדי מבחוץ, מורידים חום או מעבירים לאזור עקיף כדי שהפנים יתקדם בלי להתייבש.`,
     'נותנים מנוחה של 10-20 דקות לפני פריסה כדי לשמור על עסיסיות.',
     kosherNote,
   ];
+}
+
+function portionForCut(cut: string) {
+  if (cut.includes('כנפיים')) return '1.2 ק״ג';
+  if (cut.includes('פרגית')) return '1 ק״ג';
+  if (cut.includes('חזה עוף')) return '800 גרם';
+  if (cut.includes('צלעות טלה')) return '10-12 צלעות';
+  if (cut.includes('פיקניה')) return '1.2-1.5 ק״ג';
+  if (cut.includes('אנטריקוט') || cut.includes('סינטה') || cut.includes('שייטל')) return '1-1.3 ק״ג';
+  return '1.5-2 ק״ג';
+}
+
+function buildSeasoningIngredients(style: string, cut: string) {
+  if (style.includes('ישראלי')) {
+    return ['שמן זית - 3 כפות', 'שום כתוש - 3 שיניים', 'מיץ לימון - 2 כפות', 'פפריקה מתוקה - כפית', 'כמון או בהרט - חצי כפית', 'מלח גס - לפי משקל הבשר', 'פלפל שחור - כפית'];
+  }
+
+  if (style.includes('מתוק מעושן')) {
+    return ['פפריקה מעושנת - כפית וחצי', 'סילאן - כף אחת', 'שום גבישי - כפית', 'פלפל שחור - כפית', 'מלח גס - לפי משקל הבשר'];
+  }
+
+  if (style.includes('מתקתק')) {
+    return ['סילאן או דבש - כף אחת', 'פפריקה מתוקה - כפית', 'שום כתוש - 2 שיניים', 'מלח גס - לפי משקל הבשר', 'פלפל שחור - חצי כפית'];
+  }
+
+  if (style.includes('חריף')) {
+    return ['אריסה או צ׳ילי גרוס - כפית', 'פפריקה חריפה - חצי כפית', 'שום כתוש - 2 שיניים', 'שמן זית - 2 כפות', 'מלח גס - לפי משקל הבשר'];
+  }
+
+  if (style.includes('עשבי')) {
+    return ['רוזמרין קצוץ - כפית', 'טימין - כפית', 'פטרוזיליה קצוצה - 3 כפות', 'שום כתוש - 2 שיניים', 'שמן זית - 3 כפות', 'מלח ופלפל'];
+  }
+
+  if (style.includes('אסייתי')) {
+    return ['סויה - 3 כפות', 'ג׳ינג׳ר מגורר - כפית', 'שום כתוש - 2 שיניים', 'שמן שומשום - כפית', 'צ׳ילי - לפי הטעם'];
+  }
+
+  const salt = cut.includes('כנפיים') || cut.includes('פרגית') ? 'מלח דק - כפית וחצי' : 'מלח גס - 18 גרם לכל ק״ג בשר';
+  return [salt, 'פלפל שחור גרוס - כפית', 'שום גבישי - כפית', 'שמן זית - 2 כפות'];
+}
+
+function buildMethodIngredients(cut: string, method: string, kosherPreference: string) {
+  if (method.includes('קדירה')) {
+    return kosherPreference === 'לא כשר'
+      ? ['בצל - 2 יחידות', 'גזר - 2 יחידות', 'ציר בקר - 2 כוסות', 'יין אדום יבש - כוס אחת', 'חמאה - 25 גרם לסיום הרוטב']
+      : ['בצל - 2 יחידות', 'גזר - 2 יחידות', 'ציר בקר או מים חמים - 2 כוסות', 'עלה דפנה - 1', 'שמן זית - כף לסיום הרוטב'];
+  }
+
+  if (kosherPreference === 'לא כשר' && (cut.includes('אנטריקוט') || cut.includes('סינטה') || cut.includes('פיקניה'))) {
+    return ['חמאה - 25 גרם לסיום, לא חובה'];
+  }
+
+  if (cut.includes('כנפיים')) {
+    return ['אבקת אפייה - כפית אחת לפריכות, לא חובה', 'רוטב סיום - 3 כפות'];
+  }
+
+  return ['שמן לשימון הרשת - כף אחת'];
+}
+
+function pickSideDishes(cut: string, method: string, style: string) {
+  if (method.includes('קדירה')) {
+    return [
+      { title: 'פירה תפוחי אדמה שסופג רוטב', description: 'תוספת רכה שמחזיקה יפה את רוטב הקדירה.', steps: ['מבשלים תפוחי אדמה עד רכות.', 'מועכים עם שמן זית או חמאה לפי כשרות.', 'מוסיפים מעט מהרוטב מעל ההגשה.'] },
+      { title: 'ירקות שורש צלויים', description: 'גזר, בצל ובטטה שמתחברים לטעמי בישול ארוך.', steps: ['חותכים גס ומתבלים בשמן, מלח וטימין.', 'צולים ב-200 מעלות עד השחמה.', 'מגישים ליד הבשר והרוטב.'] },
+    ];
+  }
+
+  if (cut.includes('כנפיים')) {
+    return [
+      { title: 'סלט כרוב חמוץ-חריף', description: 'רעננות וחריפות שמאזנות עור פריך ורוטב.', steps: ['פורסים כרוב דק.', 'מערבבים לימון, מלח, מעט סוכר וצ׳ילי.', 'ממתינים 10 דקות ומגישים קר.'] },
+      { title: 'תירס חרוך על הגריל', description: 'מתיקות עדינה ליד כנפיים חריפות או מעושנות.', steps: ['מברישים תירס בשמן.', 'צורבים על הגריל עד סימני חריכה.', 'מסיימים במלח ולימון.'] },
+    ];
+  }
+
+  if (cut.includes('פיקניה')) {
+    return [
+      { title: 'סלט עגבניות ובצל חרוך', description: 'חומציות וצריבה שמאזנות את שכבת השומן.', steps: ['צורבים עגבניות ובצל על חום גבוה.', 'קוצצים גס עם לימון ושמן זית.', 'מגישים מיד ליד הפרוסות.'] },
+      { title: 'פיתה צרובה עם שמן שום', description: 'בסיס ישראלי פשוט שסופג מיצים ורטבים.', steps: ['מערבבים שמן עם שום ומלח.', 'מורחים על פיתות וצורבים קצר.', 'חותכים ומגישים חם.'] },
+    ];
+  }
+
+  if (style.includes('ישראלי')) {
+    return [
+      { title: 'סלט ירוקים ולימון', description: 'חיתוך רענן לצד תיבול ישראלי ושום.', steps: ['קוצצים פטרוזיליה, כוסברה ונענע.', 'מתבלים בלימון, שמן זית ומלח.', 'מערבבים סמוך להגשה.'] },
+      { title: 'טחינה פתוחה דלילה', description: 'קרמית אבל לא כבדה, טובה ליד מנגל.', steps: ['פותחים טחינה עם מים קרים.', 'מוסיפים לימון ומלח.', 'מגישים בצד.'] },
+    ];
+  }
+
+  return undefined;
+}
+
+function pickSauces(cut: string, method: string, kosherPreference: string) {
+  if (method.includes('קדירה')) {
+    return [
+      { title: 'רוטב קדירה מצומצם', description: 'הרוטב של הבישול עצמו, מרוכז ומבריק.', ingredients: ['כוס מנוזלי הבישול', 'כפית חרדל', 'פלפל שחור', kosherPreference === 'לא כשר' ? 'קוביית חמאה קטנה' : 'כף שמן זית'], steps: ['מסננים כוס מהרוטב.', 'מצמצמים 5-8 דקות.', 'מאזנים מלח ומגישים מעל.'] },
+      { title: 'חרדל ולימון', description: 'רוטב חד שמאזן בשר רך ועשיר.', ingredients: ['2 כפות חרדל', 'כף לימון', 'כף שמן זית', 'פלפל שחור'], steps: ['מערבבים הכל בקערית.', 'טועמים ומאזנים מלח.', 'מגישים ליד הבשר.'] },
+    ];
+  }
+
+  if (cut.includes('כנפיים')) {
+    return [
+      { title: 'גלייז סילאן-צ׳ילי', description: 'ציפוי מבריק שמורחים רק בסוף כדי שלא יישרף.', ingredients: ['2 כפות סילאן', 'כפית צ׳ילי', 'כף מים חמים', 'מעט לימון'], steps: ['מערבבים לרוטב חלק.', 'מברישים ב-5 דקות האחרונות.', 'מגישים עוד קצת בצד.'] },
+      { title: 'יוגורט עשבים קר', description: kosherPreference === 'לא כשר' ? 'רוטב קר שמאזן חריפות.' : 'בכשר מחליפים בטחינה עשבית.', ingredients: kosherPreference === 'לא כשר' ? ['יוגורט - חצי כוס', 'לימון', 'נענע', 'מלח'] : ['טחינה - חצי כוס', 'מים', 'לימון', 'נענע'], steps: ['מערבבים עד מרקם חלק.', 'מקררים עד ההגשה.', 'מגישים לצד הכנפיים.'] },
+    ];
+  }
+
+  if (cut.includes('פיקניה') || cut.includes('אנטריקוט')) {
+    return [
+      { title: 'צ׳ימיצ׳ורי חד', description: 'חומציות ועשבים שמאזנים שומן.', ingredients: ['פטרוזיליה - כוס', 'שום - 2 שיניים', 'חומץ או לימון - 2 כפות', 'שמן זית - 4 כפות', 'מלח'], steps: ['קוצצים דק.', 'מערבבים וממתינים 10 דקות.', 'מגישים על הפרוסות.'] },
+      { title: 'פלפלים קלויים ושום', description: 'מתיקות חרוכה שמתאימה לגריל.', ingredients: ['2 פלפלים קלויים', 'שן שום', 'כף שמן זית', 'כפית חומץ', 'מלח'], steps: ['טוחנים גס.', 'טועמים ומאזנים.', 'מגישים בצד.'] },
+    ];
+  }
+
+  return undefined;
 }
 
 function withArticle(cut: string) {

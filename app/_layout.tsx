@@ -40,7 +40,10 @@ export default function RootLayout() {
     <ThemeProvider value={smokeTheme}>
       <Stack
         screenOptions={{
+          animation: 'fade',
+          animationDuration: 140,
           contentStyle: { backgroundColor: smokeColors.background, ...rtlView },
+          navigationBarColor: smokeColors.background,
           header: ({ options, route, navigation, back }) => (
             <RtlHeader
               title={String(options.title ?? route.name)}
@@ -60,7 +63,7 @@ export default function RootLayout() {
         <Stack.Screen name="my-recipes" options={{ title: 'המתכונים שלי' }} />
         <Stack.Screen name="modal" options={{ title: 'מידע' }} />
       </Stack>
-      <StatusBar style="light" />
+      <StatusBar style="light" backgroundColor={smokeColors.background} />
     </ThemeProvider>
   );
 }

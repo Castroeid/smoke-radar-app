@@ -2,22 +2,25 @@ import * as FileSystem from 'expo-file-system/legacy';
 import { Platform } from 'react-native';
 
 import type { RecipeResult } from '@/services/smokeRadarTypes';
+import { getCurrentUserId } from '@/services/userProfile';
 
-const savedRecipesKey = 'smoke-radar:saved-recipes';
-const savedRecipesFile = `${FileSystem.documentDirectory ?? ''}smoke-radar-saved-recipes.json`;
+const savedRecipesKeyPrefix = 'smoke-radar:saved-recipes';
+const legacySavedRecipesKey = 'smoke-radar:saved-recipes';
+const legacySavedRecipesFile = `${FileSystem.documentDirectory ?? ''}smoke-radar-saved-recipes.json`;
 const memoryStore: RecipeResult[] = [];
 
 export async function saveRecipe(recipe: RecipeResult) {
+  const userId = await getCurrentUserId();
   const existing = await getSavedRecipes();
   const next = [recipe, ...existing.filter((item) => item.title !== recipe.title)].slice(0, 20);
 
   if (Platform.OS === 'web' && hasLocalStorage()) {
-    globalThis.localStorage.setItem(savedRecipesKey, JSON.stringify(next));
+    globalThis.localStorage.setItem(getSavedRecipesKey(userId), JSON.stringify(next));
     return next;
   }
 
   if (FileSystem.documentDirectory) {
-    await FileSystem.writeAsStringAsync(savedRecipesFile, JSON.stringify(next));
+    await FileSystem.writeAsStringAsync(getSavedRecipesFile(userId), JSON.stringify(next));
     return next;
   }
 
@@ -26,22 +29,39 @@ export async function saveRecipe(recipe: RecipeResult) {
 }
 
 export async function getSavedRecipes() {
+  const userId = await getCurrentUserId();
+
   if (Platform.OS === 'web' && hasLocalStorage()) {
-    const raw = globalThis.localStorage.getItem(savedRecipesKey);
+    const raw = globalThis.localStorage.getItem(getSavedRecipesKey(userId)) ?? globalThis.localStorage.getItem(legacySavedRecipesKey);
     return parseSavedRecipes(raw);
   }
 
   if (FileSystem.documentDirectory) {
-    const info = await FileSystem.getInfoAsync(savedRecipesFile);
-    if (!info.exists) {
-      return [];
+    const userFile = getSavedRecipesFile(userId);
+    const info = await FileSystem.getInfoAsync(userFile);
+    if (info.exists) {
+      const raw = await FileSystem.readAsStringAsync(userFile);
+      return parseSavedRecipes(raw);
     }
 
-    const raw = await FileSystem.readAsStringAsync(savedRecipesFile);
-    return parseSavedRecipes(raw);
+    const legacyInfo = await FileSystem.getInfoAsync(legacySavedRecipesFile);
+    if (legacyInfo.exists) {
+      const raw = await FileSystem.readAsStringAsync(legacySavedRecipesFile);
+      return parseSavedRecipes(raw);
+    }
+
+    return [];
   }
 
   return memoryStore;
+}
+
+function getSavedRecipesKey(userId: string) {
+  return `${savedRecipesKeyPrefix}:${userId}`;
+}
+
+function getSavedRecipesFile(userId: string) {
+  return `${FileSystem.documentDirectory ?? ''}smoke-radar-saved-recipes-${userId}.json`;
 }
 
 function parseSavedRecipes(raw: string | null) {
