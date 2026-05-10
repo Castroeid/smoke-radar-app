@@ -1,0 +1,35 @@
+{
+  "cli": {
+    "version": ">= 13.0.0"
+  },
+  "build": {
+    "development": {
+      "developmentClient": true,
+      "distribution": "internal",
+      "env": {
+        "EXPO_PUBLIC_SMOKE_RADAR_API_MODE": "real",
+        "EXPO_PUBLIC_SMOKE_RADAR_API_URL": "https://smoke-radar-app.onrender.com"
+      }
+    },
+    "preview": {
+      "distribution": "internal",
+      "android": {
+        "buildType": "apk"
+      },
+      "env": {
+        "EXPO_PUBLIC_SMOKE_RADAR_API_MODE": "real",
+        "EXPO_PUBLIC_SMOKE_RADAR_API_URL": "https://smoke-radar-app.onrender.com"
+      }
+    },
+    "production": {
+      "autoIncrement": true,
+      "env": {
+        "EXPO_PUBLIC_SMOKE_RADAR_API_MODE": "real",
+        "EXPO_PUBLIC_SMOKE_RADAR_API_URL": "https://smoke-radar-app.onrender.com"
+      }
+    }
+  },
+  "submit": {
+    "production": {}
+  }
+}
