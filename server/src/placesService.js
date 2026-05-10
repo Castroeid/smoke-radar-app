@@ -73,7 +73,7 @@ async function searchNewTextQuery(textQuery, location) {
       regionCode: 'IL',
       pageSize: 10,
       rankPreference: 'RELEVANCE',
-      locationRestriction: {
+      locationBias: {
         circle: {
           center: {
             latitude: location.lat,
