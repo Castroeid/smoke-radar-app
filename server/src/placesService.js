@@ -71,7 +71,7 @@ async function searchNewTextQuery(textQuery, location) {
       textQuery,
       languageCode: 'he',
       regionCode: 'IL',
-      pageSize: 10,
+      maxResultCount: 10,
       rankPreference: 'RELEVANCE',
       locationBias: {
         circle: {
