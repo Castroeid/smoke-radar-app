@@ -8,6 +8,10 @@ import { findButchersWithPlaces } from './placesService.js';
 export async function route(req, res) {
   const url = new URL(req.url ?? '/', `http://${req.headers.host ?? 'localhost'}`);
 
+  if (url.pathname === '/butchers/nearby') {
+    console.log('Incoming butchers request:', url.searchParams.toString() || 'without-location');
+  }
+
   if (req.method === 'OPTIONS') {
     sendOptions(res);
     return;

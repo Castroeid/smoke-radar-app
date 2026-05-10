@@ -19,6 +19,7 @@ const butcherSearchQueries = [
 
 export async function findButchersWithPlaces({ lat, lng } = {}) {
   if (!process.env.GOOGLE_PLACES_API_KEY) {
+    console.warn('Butcher lookup fallback: missing GOOGLE_PLACES_API_KEY');
     return markFallbackButchers('אין מפתח גוגל פעיל בשרת.');
   }
 
@@ -28,22 +29,28 @@ export async function findButchersWithPlaces({ lat, lng } = {}) {
   };
 
   try {
+    console.log('Butcher lookup started:', location);
+
     const newTextResults = await searchNewTextButchers(location);
+    console.log('Butcher lookup Google Places New count:', newTextResults.length);
     if (newTextResults.length > 0) {
       return newTextResults;
     }
 
     const nearbyResults = await searchNearbyButchers(location);
+    console.log('Butcher lookup Google nearby count:', nearbyResults.length);
     if (nearbyResults.length > 0) {
       return nearbyResults;
     }
 
     const textResults = await searchTextButchers(location);
+    console.log('Butcher lookup Google text count:', textResults.length);
     if (textResults.length > 0) {
       return textResults;
     }
 
     const openStreetMapResults = await searchOpenStreetMapButchers(location);
+    console.log('Butcher lookup OpenStreetMap count:', openStreetMapResults.length);
     if (openStreetMapResults.length > 0) {
       console.warn('Using OpenStreetMap butcher results after empty Google Places response:', openStreetMapResults.length);
       return openStreetMapResults;
