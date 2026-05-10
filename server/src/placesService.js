@@ -3,6 +3,7 @@ import { butchers } from './mockData.js';
 const nearbySearchUrl = 'https://maps.googleapis.com/maps/api/place/nearbysearch/json';
 const textSearchUrl = 'https://maps.googleapis.com/maps/api/place/textsearch/json';
 const newTextSearchUrl = 'https://places.googleapis.com/v1/places:searchText';
+const overpassSearchUrl = 'https://overpass-api.de/api/interpreter';
 const defaultLocation = { lat: 32.0853, lng: 34.7818 };
 const searchRadiusMeters = 45000;
 const maxButcherResults = 10;
@@ -42,6 +43,12 @@ export async function findButchersWithPlaces({ lat, lng } = {}) {
       return textResults;
     }
 
+    const openStreetMapResults = await searchOpenStreetMapButchers(location);
+    if (openStreetMapResults.length > 0) {
+      console.warn('Using OpenStreetMap butcher results after empty Google Places response:', openStreetMapResults.length);
+      return openStreetMapResults;
+    }
+
     console.warn('Google Places returned no butcher results near location:', location);
     return markFallbackButchers('גוגל לא החזיר תוצאות באזור הזה.');
   } catch (error) {
@@ -71,7 +78,7 @@ async function searchNewTextQuery(textQuery, location) {
       textQuery,
       languageCode: 'he',
       regionCode: 'IL',
-      maxResultCount: 10,
+      pageSize: 10,
       rankPreference: 'RELEVANCE',
       locationBias: {
         circle: {
@@ -131,6 +138,32 @@ async function searchTextButchers(location) {
   return dedupeAndRankButchers(resultGroups.flat()).slice(0, maxButcherResults);
 }
 
+async function searchOpenStreetMapButchers(location) {
+  const data = new URLSearchParams({
+    data: buildOpenStreetMapQuery(location),
+  });
+
+  const response = await fetch(overpassSearchUrl, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8',
+    },
+    body: data,
+  });
+  const body = await response.json().catch(() => ({}));
+
+  if (!response.ok) {
+    console.warn('OpenStreetMap Overpass search failed:', response.status);
+    return [];
+  }
+
+  return dedupeAndRankButchers(
+    (body.elements ?? [])
+      .map((element) => mapOpenStreetMapElementToButcher(element, location))
+      .filter(Boolean)
+  ).slice(0, maxButcherResults);
+}
+
 async function fetchPlaces(url, location, searchType) {
   const response = await fetch(url);
   const data = await response.json().catch(() => ({}));
@@ -183,6 +216,30 @@ function mapPlaceToButcher(place, location, searchType) {
   };
 }
 
+function mapOpenStreetMapElementToButcher(element, location) {
+  const placeLocation = resolveOpenStreetMapLocation(element);
+
+  if (!placeLocation) {
+    return null;
+  }
+
+  const tags = element.tags ?? {};
+  const name = tags['name:he'] ?? tags.name ?? tags.brand ?? 'קצבייה';
+  const distanceMeters = calculateDistanceMeters(location, placeLocation);
+
+  return {
+    id: `osm-${element.type}-${element.id}`,
+    name,
+    rating: 'חדש',
+    ratingCount: 0,
+    address: formatOpenStreetMapAddress(tags, placeLocation),
+    reviewHighlight: `כ-${formatDistance(distanceMeters)} מהמיקום שלכם. נמצאה במאגר OpenStreetMap לפי המיקום. מומלץ לבדוק זמינות ונתחים לפני ההגעה.`,
+    mapsUrl: `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(`${name} ${placeLocation.lat},${placeLocation.lng}`)}`,
+    source: 'google',
+    distanceMeters,
+  };
+}
+
 function buildReviewHighlight(place, distanceMeters, searchType) {
   const distanceText = distanceMeters ? `כ-${formatDistance(distanceMeters)} מהמיקום שלכם. ` : '';
   const ratingText = place.user_ratings_total ? `${place.user_ratings_total} דירוגים בגוגל. ` : '';
@@ -223,6 +280,51 @@ function dedupeAndRankButchers(items) {
 
 function isWithinSearchRadius(item) {
   return !item.distanceMeters || item.distanceMeters <= searchRadiusMeters;
+}
+
+function buildOpenStreetMapQuery(location) {
+  const around = `(around:${searchRadiusMeters},${location.lat},${location.lng})`;
+
+  return `
+[out:json][timeout:10];
+(
+  node["shop"="butcher"]${around};
+  way["shop"="butcher"]${around};
+  relation["shop"="butcher"]${around};
+  node["craft"="butcher"]${around};
+  way["craft"="butcher"]${around};
+  relation["craft"="butcher"]${around};
+  node["name"~"קצב|קצביה|קצבייה|אטליז|בשר",i]${around};
+  way["name"~"קצב|קצביה|קצבייה|אטליז|בשר",i]${around};
+  relation["name"~"קצב|קצביה|קצבייה|אטליז|בשר",i]${around};
+);
+out center ${maxButcherResults * 3};
+`;
+}
+
+function resolveOpenStreetMapLocation(element) {
+  const lat = element.lat ?? element.center?.lat;
+  const lng = element.lon ?? element.center?.lon;
+
+  if (!Number.isFinite(lat) || !Number.isFinite(lng)) {
+    return null;
+  }
+
+  return { lat, lng };
+}
+
+function formatOpenStreetMapAddress(tags, location) {
+  const street = tags['addr:street'];
+  const houseNumber = tags['addr:housenumber'];
+  const city = tags['addr:city'] ?? tags['addr:town'] ?? tags['addr:suburb'];
+  const streetAddress = [street, houseNumber].filter(Boolean).join(' ');
+  const address = [streetAddress, city].filter(Boolean).join(', ');
+
+  if (address) {
+    return address;
+  }
+
+  return `מיקום במפה: ${location.lat.toFixed(4)}, ${location.lng.toFixed(4)}`;
 }
 
 function sortButchersByTrust(first, second) {
