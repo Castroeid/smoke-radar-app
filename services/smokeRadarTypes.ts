@@ -53,4 +53,5 @@ export type Butcher = {
   mapsUrl?: string;
   source?: 'google' | 'fallback';
   distanceMeters?: number;
+  ratingCount?: number;
 };

@@ -237,7 +237,12 @@ function buildCutAwareSteps(cut: string, method: string, style: string, kosherNo
   }
 
   const shouldDry =
-    cut.includes('פיקניה') || cut.includes('אנטריקוט') || cut.includes('סינטה') || cut.includes('שייטל') || cut.includes('כנפיים');
+    cut.includes('פיקניה') ||
+    cut.includes('אנטריקוט') ||
+    cut.includes('פילה') ||
+    cut.includes('סינטה') ||
+    cut.includes('שייטל') ||
+    cut.includes('כנפיים');
 
   return [
     shouldDry
@@ -257,6 +262,7 @@ function portionForCut(cut: string) {
   if (cut.includes('חזה עוף')) return '800 גרם';
   if (cut.includes('צלעות טלה')) return '10-12 צלעות';
   if (cut.includes('פיקניה')) return '1.2-1.5 ק״ג';
+  if (cut.includes('פילה')) return '800 גרם-1 ק״ג';
   if (cut.includes('אנטריקוט') || cut.includes('סינטה') || cut.includes('שייטל')) return '1-1.3 ק״ג';
   return '1.5-2 ק״ג';
 }
@@ -297,7 +303,7 @@ function buildMethodIngredients(cut: string, method: string, kosherPreference: s
       : ['בצל - 2 יחידות', 'גזר - 2 יחידות', 'ציר בקר או מים חמים - 2 כוסות', 'עלה דפנה - 1', 'שמן זית - כף לסיום הרוטב'];
   }
 
-  if (kosherPreference === 'לא כשר' && (cut.includes('אנטריקוט') || cut.includes('סינטה') || cut.includes('פיקניה'))) {
+  if (kosherPreference === 'לא כשר' && (cut.includes('אנטריקוט') || cut.includes('פילה') || cut.includes('סינטה') || cut.includes('פיקניה'))) {
     return ['חמאה - 25 גרם לסיום, לא חובה'];
   }
 
@@ -355,7 +361,7 @@ function pickSauces(cut: string, method: string, kosherPreference: string) {
     ];
   }
 
-  if (cut.includes('פיקניה') || cut.includes('אנטריקוט')) {
+  if (cut.includes('פיקניה') || cut.includes('אנטריקוט') || cut.includes('פילה')) {
     return [
       { title: 'צ׳ימיצ׳ורי חד', description: 'חומציות ועשבים שמאזנים שומן.', ingredients: ['פטרוזיליה - כוס', 'שום - 2 שיניים', 'חומץ או לימון - 2 כפות', 'שמן זית - 4 כפות', 'מלח'], steps: ['קוצצים דק.', 'מערבבים וממתינים 10 דקות.', 'מגישים על הפרוסות.'] },
       { title: 'פלפלים קלויים ושום', description: 'מתיקות חרוכה שמתאימה לגריל.', ingredients: ['2 פלפלים קלויים', 'שן שום', 'כף שמן זית', 'כפית חומץ', 'מלח'], steps: ['טוחנים גס.', 'טועמים ומאזנים.', 'מגישים בצד.'] },
@@ -388,6 +394,7 @@ export async function findMockNearbyButchers(): Promise<Butcher[]> {
       id: 'embers',
       name: 'קצביית הגחלים',
       rating: '4.9',
+      ratingCount: 327,
       address: 'רחוב האש 12, תל אביב',
       reviewHighlight: 'לקוחות מציינים נתחים מעולים למעשנה ושירות שמבין בברביקיו.',
     },
@@ -395,6 +402,7 @@ export async function findMockNearbyButchers(): Promise<Butcher[]> {
       id: 'smoke-market',
       name: 'Smoke Market',
       rating: '4.8',
+      ratingCount: 214,
       address: 'דרך מנגלים 7, רמת גן',
       reviewHighlight: 'מבחר יפה של אסאדו, בריסקט ורטבים חריפים.',
     },
@@ -402,6 +410,7 @@ export async function findMockNearbyButchers(): Promise<Butcher[]> {
       id: 'butcher-lab',
       name: 'מעבדת הבשר',
       rating: '4.7',
+      ratingCount: 146,
       address: 'שדרות הפחמים 4, גבעתיים',
       reviewHighlight: 'חיתוך מדויק במקום והמלצות טובות לזמני צלייה.',
     },

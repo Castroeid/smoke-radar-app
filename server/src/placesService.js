@@ -73,7 +73,7 @@ async function searchNewTextButchers(location) {
 
   return (data.places ?? [])
     .map((place) => mapNewPlaceToButcher(place, location))
-    .sort((first, second) => (first.distanceMeters ?? Infinity) - (second.distanceMeters ?? Infinity))
+    .sort(sortButchersByTrust)
     .slice(0, 8);
 }
 
@@ -114,7 +114,7 @@ async function fetchPlaces(url, location, searchType) {
 
   return data.results
     .map((place) => mapPlaceToButcher(place, location, searchType))
-    .sort((first, second) => (first.distanceMeters ?? Infinity) - (second.distanceMeters ?? Infinity))
+    .sort(sortButchersByTrust)
     .slice(0, 8);
 }
 
@@ -126,6 +126,7 @@ function mapNewPlaceToButcher(place, location) {
     id: place.id,
     name: place.displayName?.text ?? 'קצבייה',
     rating: place.rating ? String(place.rating) : 'חדש',
+    ratingCount: place.userRatingCount ?? 0,
     address: place.formattedAddress ?? 'כתובת לא זמינה',
     reviewHighlight: buildReviewHighlight({ user_ratings_total: place.userRatingCount }, distanceMeters, 'new-text'),
     mapsUrl: place.googleMapsUri ?? `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(place.displayName?.text ?? 'קצביה')}`,
@@ -142,6 +143,7 @@ function mapPlaceToButcher(place, location, searchType) {
     id: place.place_id,
     name: place.name,
     rating: place.rating ? String(place.rating) : 'חדש',
+    ratingCount: place.user_ratings_total ?? 0,
     address: place.vicinity ?? place.formatted_address ?? 'כתובת לא זמינה',
     reviewHighlight: buildReviewHighlight(place, distanceMeters, searchType),
     mapsUrl: `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(place.name)}&query_place_id=${place.place_id}`,
@@ -169,6 +171,32 @@ function markFallbackButchers(reason) {
     source: 'fallback',
     reviewHighlight: `${butcher.reviewHighlight} ${reason}`,
   }));
+}
+
+function sortButchersByTrust(first, second) {
+  const scoreDiff = weightedButcherScore(second) - weightedButcherScore(first);
+
+  if (Math.abs(scoreDiff) > 0.01) {
+    return scoreDiff;
+  }
+
+  return (first.distanceMeters ?? Infinity) - (second.distanceMeters ?? Infinity);
+}
+
+function weightedButcherScore(butcher) {
+  const rating = Number.parseFloat(butcher.rating);
+  const ratingCount = Number(butcher.ratingCount ?? 0);
+
+  if (!Number.isFinite(rating) || ratingCount <= 0) {
+    return 0;
+  }
+
+  const baselineRating = 4.2;
+  const baselineCount = 30;
+  const bayesianRating = (rating * ratingCount + baselineRating * baselineCount) / (ratingCount + baselineCount);
+  const confidenceBoost = Math.min(0.35, Math.log10(ratingCount + 1) * 0.08);
+
+  return bayesianRating + confidenceBoost;
 }
 
 function calculateDistanceMeters(from, to) {

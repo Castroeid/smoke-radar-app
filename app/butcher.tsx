@@ -8,7 +8,7 @@ import { AppScreen } from '@/components/AppScreen';
 import { SectionTitle } from '@/components/SectionTitle';
 import { SmokeImage } from '@/components/SmokeImage';
 import { smokeImages } from '@/constants/smokeImages';
-import { rtlBlockText, rtlRow, rtlText, smokeColors } from '@/constants/smokeTheme';
+import { centerText, rtlBlockText, rtlRow, rtlText, smokeColors } from '@/constants/smokeTheme';
 import { requestUserLocation, type UserLocation } from '@/services/locationService';
 import { findNearbyButchers, type Butcher } from '@/services/smokeRadarService';
 
@@ -21,7 +21,7 @@ export default function ButcherScreen() {
     setLoading(true);
     try {
       const results = await findNearbyButchers(location);
-      setItems(results);
+      setItems(rankButchers(results));
       if (location) {
         const hasGoogleResults = results.some((item) => item.source === 'google');
         setLocationStatus(
@@ -83,7 +83,7 @@ export default function ButcherScreen() {
           <AppCard key={item.id}>
             <View style={styles.topRow}>
               <Text style={styles.name}>{item.name}</Text>
-              <Text style={styles.rating}>★ {item.rating}</Text>
+              <Text style={styles.rating}>{formatRating(item)}</Text>
             </View>
             <Text style={styles.address}>{item.address}</Text>
             {item.distanceMeters ? <Text style={styles.distance}>{formatDistance(item.distanceMeters)}</Text> : null}
@@ -137,6 +137,7 @@ const styles = StyleSheet.create({
     fontWeight: '900',
     paddingHorizontal: 10,
     paddingVertical: 7,
+    ...centerText,
   },
   address: {
     color: smokeColors.orange,
@@ -168,4 +169,37 @@ function formatDistance(distanceMeters: number) {
   }
 
   return `כ-${(distanceMeters / 1000).toFixed(1)} ק״מ ממך`;
+}
+
+function formatRating(item: Butcher) {
+  const rating = item.rating === 'חדש' ? item.rating : `★ ${item.rating}`;
+  return item.ratingCount ? `${rating} · ${item.ratingCount}` : rating;
+}
+
+function rankButchers(items: Butcher[]) {
+  return [...items].sort((first, second) => {
+    const scoreDiff = weightedButcherScore(second) - weightedButcherScore(first);
+
+    if (Math.abs(scoreDiff) > 0.01) {
+      return scoreDiff;
+    }
+
+    return (first.distanceMeters ?? Infinity) - (second.distanceMeters ?? Infinity);
+  });
+}
+
+function weightedButcherScore(item: Butcher) {
+  const rating = Number.parseFloat(item.rating);
+  const ratingCount = Number(item.ratingCount ?? 0);
+
+  if (!Number.isFinite(rating) || ratingCount <= 0) {
+    return 0;
+  }
+
+  const baselineRating = 4.2;
+  const baselineCount = 30;
+  const bayesianRating = (rating * ratingCount + baselineRating * baselineCount) / (ratingCount + baselineCount);
+  const confidenceBoost = Math.min(0.35, Math.log10(ratingCount + 1) * 0.08);
+
+  return bayesianRating + confidenceBoost;
 }

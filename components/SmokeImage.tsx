@@ -1,22 +1,22 @@
-import { Image, type ImageSource } from 'expo-image';
+import { Image, type ImageContentFit, type ImageSource } from 'expo-image';
 import { StyleSheet, View } from 'react-native';
 
 type SmokeImageProps = {
   source: ImageSource | string | number | ImageSource[] | string[] | null;
   height?: number;
+  contentFit?: ImageContentFit;
 };
 
-export function SmokeImage({ source, height = 180 }: SmokeImageProps) {
+export function SmokeImage({ source, height = 180, contentFit = 'cover' }: SmokeImageProps) {
   return (
     <View style={[styles.image, { height }]}>
       <Image
         source={source}
         style={StyleSheet.absoluteFill}
-        contentFit="cover"
-        transition={260}
-        cachePolicy="disk"
+        contentFit={contentFit}
+        transition={0}
+        cachePolicy="memory-disk"
         priority="high"
-        placeholder={{ blurhash: 'L25O6[0L4T~W4TMyx[t7M{Rj00IV' }}
       />
       <View style={styles.overlay} />
     </View>

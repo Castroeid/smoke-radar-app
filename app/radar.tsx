@@ -8,7 +8,7 @@ import { AppScreen } from '@/components/AppScreen';
 import { SectionTitle } from '@/components/SectionTitle';
 import { SmokeImage } from '@/components/SmokeImage';
 import { smokeImages } from '@/constants/smokeImages';
-import { centerBlockText, centerText, smokeColors } from '@/constants/smokeTheme';
+import { centerBlockText, centerText, rtlText, smokeColors } from '@/constants/smokeTheme';
 import { getTrendingCuts, type RadarCut } from '@/services/smokeRadarService';
 
 export default function RadarScreen() {
@@ -131,12 +131,13 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: '900',
     lineHeight: 24,
-    textAlign: 'center',
+    ...centerText,
   },
   infoText: {
     color: smokeColors.text,
     fontSize: 14,
     fontWeight: '900',
+    ...rtlText,
   },
   infoCard: {
     borderColor: smokeColors.orange,

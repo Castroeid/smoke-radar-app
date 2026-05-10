@@ -78,7 +78,9 @@ export function SmokePulse({ label = 'הרדאר סורק...', captions }: Smoke
         <View style={styles.innerRing} />
 
         <Animated.View style={[styles.scanLayer, { transform: [{ rotate }] }]}>
-          <View style={styles.scanBeam} />
+          <View style={styles.smokeTrailOne} />
+          <View style={styles.smokeTrailTwo} />
+          <View style={styles.smokeTrailThree} />
           <View style={styles.scanLine} />
           <View style={styles.scanDot} />
         </Animated.View>
@@ -149,20 +151,40 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'flex-start',
   },
-  scanBeam: {
-    width: 92,
-    height: 92,
-    borderTopLeftRadius: 92,
-    backgroundColor: 'rgba(255, 122, 26, 0.105)',
-    transform: [{ translateY: 4 }, { rotate: '45deg' }],
+  smokeTrailOne: {
+    position: 'absolute',
+    top: 28,
+    width: 18,
+    height: 66,
+    borderRadius: 18,
+    backgroundColor: 'rgba(255, 247, 240, 0.10)',
+    transform: [{ translateX: -14 }, { rotate: '-16deg' }],
+  },
+  smokeTrailTwo: {
+    position: 'absolute',
+    top: 42,
+    width: 12,
+    height: 48,
+    borderRadius: 12,
+    backgroundColor: 'rgba(255, 122, 26, 0.10)',
+    transform: [{ translateX: -25 }, { rotate: '-28deg' }],
+  },
+  smokeTrailThree: {
+    position: 'absolute',
+    top: 56,
+    width: 8,
+    height: 34,
+    borderRadius: 8,
+    backgroundColor: 'rgba(255, 193, 102, 0.12)',
+    transform: [{ translateX: -34 }, { rotate: '-38deg' }],
   },
   scanLine: {
     position: 'absolute',
     top: 13,
-    width: 2,
+    width: 3,
     height: 80,
-    borderRadius: 2,
-    backgroundColor: 'rgba(255, 193, 102, 0.42)',
+    borderRadius: 3,
+    backgroundColor: 'rgba(255, 193, 102, 0.64)',
   },
   scanDot: {
     position: 'absolute',

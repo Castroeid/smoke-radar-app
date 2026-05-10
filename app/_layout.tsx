@@ -2,6 +2,7 @@ import { DarkTheme, ThemeProvider } from '@react-navigation/native';
 import { Image } from 'expo-image';
 import { Stack } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
+import * as SystemUI from 'expo-system-ui';
 import { useEffect } from 'react';
 import { Platform, Pressable, StyleSheet, Text, View } from 'react-native';
 import 'react-native-reanimated';
@@ -23,6 +24,8 @@ const smokeTheme = {
 
 export default function RootLayout() {
   useEffect(() => {
+    void SystemUI.setBackgroundColorAsync(smokeColors.background);
+
     if (Platform.OS === 'web' && typeof document !== 'undefined') {
       document.documentElement.dir = 'rtl';
       document.documentElement.lang = 'he';
@@ -40,10 +43,11 @@ export default function RootLayout() {
     <ThemeProvider value={smokeTheme}>
       <Stack
         screenOptions={{
-          animation: 'fade',
-          animationDuration: 140,
+          animation: 'none',
           contentStyle: { backgroundColor: smokeColors.background, ...rtlView },
           navigationBarColor: smokeColors.background,
+          statusBarBackgroundColor: smokeColors.background,
+          statusBarStyle: 'light',
           header: ({ options, route, navigation, back }) => (
             <RtlHeader
               title={String(options.title ?? route.name)}

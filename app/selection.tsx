@@ -6,8 +6,6 @@ import { AppButton } from '@/components/AppButton';
 import { AppCard } from '@/components/AppCard';
 import { AppScreen } from '@/components/AppScreen';
 import { SectionTitle } from '@/components/SectionTitle';
-import { SmokeImage } from '@/components/SmokeImage';
-import { smokeImages } from '@/constants/smokeImages';
 import { centerBlockText, centerText, rtlRow, rtlText, smokeColors } from '@/constants/smokeTheme';
 import { normalizeCutName } from '@/services/cutUtils';
 
@@ -29,56 +27,6 @@ type CutCategory = {
 };
 
 const cutCategories: CutCategory[] = [
-  {
-    id: 'beef',
-    title: 'בקר',
-    subtitle: 'נתחים של פרה, בעיקר למעשנה, קדירה, מנגל וגריל.',
-    cuts: [
-      {
-        number: '1',
-        name: 'אסאדו',
-        alias: 'נקרא גם שורט ריבס / שפונדרה',
-        description: 'נתח צלעות עשיר בשומן וקולגן. מתאים לבישול ארוך עד רכות עמוקה, לא לנתח מהיר.',
-        bestFor: 'מעשנה, סיר קדירה, גריל עקיף ארוך',
-      },
-      {
-        number: '2',
-        name: 'בריסקט',
-        description: 'חזה בקר סיבי ועמוק בטעם. דורש זמן, חום נמוך וסבלנות כדי להפוך לרך.',
-        bestFor: 'מעשנה, בישול ארוך, כריכים מפורקים',
-      },
-      {
-        number: '3',
-        name: 'פיקניה',
-        description: 'נתח אחורי עם שכבת שומן יפה. מצוין לצריבה, שיפוד ברזילאי או מנגל מדויק.',
-        bestFor: 'מנגל ישראלי, גריל פחמים, צריבה ואז חום עקיף',
-      },
-      {
-        number: '4',
-        name: 'אנטריקוט',
-        description: 'סטייק עסיסי ומשויש. מתאים למי שרוצה תוצאה מהירה עם שומן וטעם מודגש.',
-        bestFor: 'גריל פחמים, פלנצ׳ה, מנגל חם',
-      },
-      {
-        number: '5',
-        name: 'סינטה',
-        description: 'נתח רזה יחסית, נקי ואלגנטי. צריך דיוק כדי לא לייבש אותו.',
-        bestFor: 'צריבה קצרה, גריל, פריסה דקה',
-      },
-      {
-        number: '6',
-        name: 'שייטל',
-        description: 'נתח אחורי רזה עם טעם בשרי עדין. טוב לשיפודים, רוסטביף או צריבה מהירה.',
-        bestFor: 'שיפודים, פלנצ׳ה, רוסטביף',
-      },
-      {
-        number: '7',
-        name: 'אונטריב',
-        description: 'נתח קדמי עם סיבים, שומן וטעם חזק. נהדר לבישול ארוך ופירוק.',
-        bestFor: 'קדירה, פירוק, מעשנה עד רכות',
-      },
-    ],
-  },
   {
     id: 'lamb',
     title: 'כבש / טלה',
@@ -133,39 +81,82 @@ const cutCategories: CutCategory[] = [
       },
     ],
   },
+  {
+    id: 'beef',
+    title: 'בקר',
+    subtitle: 'נתחים של פרה, בעיקר למעשנה, קדירה, מנגל וגריל.',
+    cuts: [
+      {
+        number: '1',
+        name: 'אסאדו',
+        alias: 'נקרא גם שורט ריבס / שפונדרה',
+        description: 'נתח צלעות עשיר בשומן וקולגן. מתאים לבישול ארוך עד רכות עמוקה, לא לנתח מהיר.',
+        bestFor: 'מעשנה, סיר קדירה, גריל עקיף ארוך',
+      },
+      {
+        number: '2',
+        name: 'בריסקט',
+        description: 'חזה בקר סיבי ועמוק בטעם. דורש זמן, חום נמוך וסבלנות כדי להפוך לרך.',
+        bestFor: 'מעשנה, בישול ארוך, כריכים מפורקים',
+      },
+      {
+        number: '3',
+        name: 'פיקניה',
+        description: 'נתח אחורי עם שכבת שומן יפה. מצוין לצריבה, שיפוד ברזילאי או מנגל מדויק.',
+        bestFor: 'מנגל ישראלי, גריל פחמים, צריבה ואז חום עקיף',
+      },
+      {
+        number: '4',
+        name: 'אנטריקוט',
+        description: 'סטייק עסיסי ומשויש. מתאים למי שרוצה תוצאה מהירה עם שומן וטעם מודגש.',
+        bestFor: 'גריל פחמים, פלנצ׳ה, מנגל חם',
+      },
+      {
+        number: '5',
+        name: 'פילה',
+        description: 'נתח רך מאוד ודל שומן. דורש צלייה קצרה ומדויקת כדי לא לאבד עסיסיות.',
+        bestFor: 'צריבה קצרה, פלנצ׳ה, גריל חם ומדויק',
+      },
+      {
+        number: '6',
+        name: 'סינטה',
+        description: 'נתח רזה יחסית, נקי ואלגנטי. צריך דיוק כדי לא לייבש אותו.',
+        bestFor: 'צריבה קצרה, גריל, פריסה דקה',
+      },
+      {
+        number: '7',
+        name: 'שייטל',
+        description: 'נתח אחורי רזה עם טעם בשרי עדין. טוב לשיפודים, רוסטביף או צריבה מהירה.',
+        bestFor: 'שיפודים, פלנצ׳ה, רוסטביף',
+      },
+      {
+        number: '8',
+        name: 'אונטריב',
+        description: 'נתח קדמי עם סיבים, שומן וטעם חזק. נהדר לבישול ארוך ופירוק.',
+        bestFor: 'קדירה, פירוק, מעשנה עד רכות',
+      },
+    ],
+  },
 ];
 
 export default function SelectionScreen() {
   const { meat, custom } = useLocalSearchParams<{ meat?: string; custom?: string }>();
   const incomingCut = normalizeCutName(typeof meat === 'string' ? meat : undefined);
   const initialCategoryId = findCategoryByCut(incomingCut)?.id ?? 'beef';
-  const [categoryId, setCategoryId] = useState<CutCategoryId>(initialCategoryId);
   const [selectedCut, setSelectedCut] = useState(incomingCut);
-  const [dropdownOpen, setDropdownOpen] = useState(custom === 'true' || !meat);
+  const [openCategoryId, setOpenCategoryId] = useState<CutCategoryId | null>(custom === 'true' || !meat ? initialCategoryId : null);
   const allowCustomCut = custom === 'true' || !meat;
 
-  const activeCategory = useMemo(
-    () => cutCategories.find((category) => category.id === categoryId) ?? cutCategories[0],
-    [categoryId]
-  );
-  const selectedOption = findCutOption(selectedCut) ?? activeCategory.cuts[0];
-
-  const selectCategory = (nextCategory: CutCategory) => {
-    setCategoryId(nextCategory.id);
-    setSelectedCut(nextCategory.cuts[0].name);
-    setDropdownOpen(true);
-  };
+  const selectedCategory = useMemo(() => findCategoryByCut(selectedCut) ?? cutCategories[0], [selectedCut]);
+  const selectedOption = findCutOption(selectedCut) ?? selectedCategory.cuts[0];
 
   const selectCut = (cut: CutOption) => {
     setSelectedCut(cut.name);
-    setDropdownOpen(false);
   };
 
   return (
     <AppScreen style={styles.screen}>
       <SectionTitle title="מה תרצו לעשות?" subtitle={`בחרתם: ${selectedCut}`} />
-
-      <SmokeImage source={smokeImages.choiceCuts} height={120} />
 
       <AppCard style={styles.cutCard}>
         <Text style={styles.cutLabel}>המסלול הבא שלכם</Text>
@@ -174,43 +165,24 @@ export default function SelectionScreen() {
 
         {allowCustomCut ? (
           <>
-            <View style={styles.categoryTabs}>
+            <View style={styles.dropdowns}>
               {cutCategories.map((category) => {
-                const selected = category.id === categoryId;
+                const isOpen = openCategoryId === category.id;
+                const categorySelection = category.cuts.find((cut) => cut.name === selectedCut || cut.alias?.includes(selectedCut));
 
                 return (
-                  <Pressable
+                  <CategoryDropdown
                     key={category.id}
-                    style={[styles.categoryTab, selected && styles.categoryTabActive]}
-                    onPress={() => selectCategory(category)}>
-                    <Text style={[styles.categoryText, selected && styles.categoryTextActive]}>{category.title}</Text>
-                  </Pressable>
+                    category={category}
+                    isOpen={isOpen}
+                    selectedCut={selectedCut}
+                    categorySelection={categorySelection}
+                    onToggle={() => setOpenCategoryId(isOpen ? null : category.id)}
+                    onSelect={selectCut}
+                  />
                 );
               })}
             </View>
-
-            <Text style={styles.categorySubtitle}>{activeCategory.subtitle}</Text>
-            {activeCategory.id === 'beef' ? <BeefCutMap selectedNumber={selectedOption.number} /> : null}
-
-            <Pressable style={styles.dropdownButton} onPress={() => setDropdownOpen((open) => !open)}>
-              <Text style={styles.dropdownTitle}>בחרו נתח</Text>
-              <Text style={styles.dropdownValue}>{formatCutName(selectedOption)}</Text>
-            </Pressable>
-
-            {dropdownOpen ? (
-              <View style={styles.cutList}>
-                {activeCategory.cuts.map((cut) => {
-                  const selected = cut.name === selectedCut;
-
-                  return (
-                    <Pressable key={cut.name} style={[styles.cutOption, selected && styles.cutOptionActive]} onPress={() => selectCut(cut)}>
-                      <Text style={[styles.cutOptionTitle, selected && styles.cutOptionTitleActive]}>{formatCutName(cut)}</Text>
-                      <Text style={styles.cutOptionText}>{cut.description}</Text>
-                    </Pressable>
-                  );
-                })}
-              </View>
-            ) : null}
           </>
         ) : null}
 
@@ -238,14 +210,65 @@ export default function SelectionScreen() {
   );
 }
 
-function BeefCutMap({ selectedNumber }: { selectedNumber?: string }) {
+function CategoryDropdown({
+  category,
+  isOpen,
+  selectedCut,
+  categorySelection,
+  onToggle,
+  onSelect,
+}: {
+  category: CutCategory;
+  isOpen: boolean;
+  selectedCut: string;
+  categorySelection?: CutOption;
+  onToggle: () => void;
+  onSelect: (cut: CutOption) => void;
+}) {
   return (
-    <View style={styles.mapWrap}>
-      <Text style={styles.mapTitle}>מפת בקר מהירה</Text>
-      <View style={styles.cowBody}>
-        {cutCategories[0].cuts.map((cut, index) => (
-          <View key={cut.name} style={[styles.mapDot, mapDotPositions[index], selectedNumber === cut.number && styles.mapDotActive]}>
-            <Text style={[styles.mapDotText, selectedNumber === cut.number && styles.mapDotTextActive]}>{cut.number}</Text>
+    <View style={styles.dropdownWrap}>
+      <Pressable style={[styles.dropdownButton, isOpen && styles.dropdownButtonActive]} onPress={onToggle}>
+        <View style={styles.dropdownHeaderText}>
+          <Text style={styles.dropdownTitle}>{category.title}</Text>
+          <Text style={styles.dropdownSubtitle}>{categorySelection ? `נבחר: ${formatCutName(categorySelection)}` : category.subtitle}</Text>
+        </View>
+        <Text style={styles.dropdownIcon}>{isOpen ? '−' : '+'}</Text>
+      </Pressable>
+
+      {isOpen ? (
+        <View style={styles.dropdownPanel}>
+          {category.id === 'beef' ? <BeefCutLegend selectedNumber={categorySelection?.number} /> : null}
+          {category.cuts.map((cut) => {
+            const selected = cut.name === selectedCut;
+
+            return (
+              <Pressable key={cut.name} style={[styles.cutOption, selected && styles.cutOptionActive]} onPress={() => onSelect(cut)}>
+                <Text style={[styles.cutOptionTitle, selected && styles.cutOptionTitleActive]}>{formatCutName(cut)}</Text>
+                <Text style={styles.cutOptionText}>{cut.bestFor}</Text>
+              </Pressable>
+            );
+          })}
+        </View>
+      ) : null}
+    </View>
+  );
+}
+
+function BeefCutLegend({ selectedNumber }: { selectedNumber?: string }) {
+  const beefCategory = cutCategories.find((category) => category.id === 'beef');
+
+  if (!beefCategory) {
+    return null;
+  }
+
+  return (
+    <View style={styles.beefLegend}>
+      <Text style={styles.beefLegendTitle}>מפתח נתחים בבקר</Text>
+      <View style={styles.legendGrid}>
+        {beefCategory.cuts.map((cut) => (
+          <View key={cut.name} style={[styles.legendItem, selectedNumber === cut.number && styles.legendItemActive]}>
+            <Text style={[styles.legendNumber, selectedNumber === cut.number && styles.legendNumberActive]}>{cut.number}</Text>
+            <Text style={[styles.legendName, selectedNumber === cut.number && styles.legendNameActive]}>{cut.name}</Text>
           </View>
         ))}
       </View>
@@ -272,21 +295,9 @@ function findCutOption(cutName: string) {
   return null;
 }
 
-const mapDotPositions = [
-  { right: 102, top: 38 },
-  { right: 134, top: 42 },
-  { right: 50, top: 34 },
-  { right: 76, top: 44 },
-  { right: 34, top: 52 },
-  { right: 56, bottom: 20 },
-  { right: 124, bottom: 22 },
-];
-
 const styles = StyleSheet.create({
   screen: {
-    flex: 1,
-    justifyContent: 'center',
-    minHeight: 760,
+    justifyContent: 'flex-start',
   },
   cutCard: {
     borderColor: smokeColors.orange,
@@ -310,108 +321,111 @@ const styles = StyleSheet.create({
     fontWeight: '800',
     ...centerBlockText,
   },
-  categoryTabs: {
-    ...rtlRow,
+  dropdowns: {
+    gap: 10,
+  },
+  dropdownWrap: {
     gap: 8,
-  },
-  categoryTab: {
-    flex: 1,
-    minHeight: 44,
-    alignItems: 'center',
-    justifyContent: 'center',
-    borderRadius: 14,
-    borderWidth: 1,
-    borderColor: smokeColors.border,
-    backgroundColor: smokeColors.surfaceAlt,
-    paddingHorizontal: 10,
-  },
-  categoryTabActive: {
-    borderColor: smokeColors.orange,
-    backgroundColor: '#2A150D',
-  },
-  categoryText: {
-    color: smokeColors.muted,
-    fontSize: 14,
-    fontWeight: '900',
-    ...centerText,
-  },
-  categoryTextActive: {
-    color: smokeColors.text,
-  },
-  categorySubtitle: {
-    color: smokeColors.muted,
-    fontSize: 14,
-    lineHeight: 21,
-    ...centerBlockText,
-  },
-  mapWrap: {
-    gap: 8,
-    alignItems: 'center',
-  },
-  mapTitle: {
-    color: smokeColors.gold,
-    fontSize: 14,
-    fontWeight: '900',
-    ...centerBlockText,
-  },
-  cowBody: {
-    width: 190,
-    height: 92,
-    borderRadius: 48,
-    borderTopRightRadius: 64,
-    borderBottomLeftRadius: 36,
-    borderWidth: 1,
-    borderColor: 'rgba(255, 122, 26, 0.35)',
-    backgroundColor: '#120B08',
-  },
-  mapDot: {
-    position: 'absolute',
-    width: 28,
-    height: 28,
-    alignItems: 'center',
-    justifyContent: 'center',
-    borderRadius: 14,
-    borderWidth: 1,
-    borderColor: smokeColors.border,
-    backgroundColor: smokeColors.surfaceAlt,
-  },
-  mapDotActive: {
-    borderColor: smokeColors.orange,
-    backgroundColor: smokeColors.orange,
-  },
-  mapDotText: {
-    color: smokeColors.gold,
-    fontSize: 12,
-    fontWeight: '900',
-    ...centerText,
-  },
-  mapDotTextActive: {
-    color: smokeColors.black,
   },
   dropdownButton: {
-    minHeight: 58,
+    ...rtlRow,
+    minHeight: 64,
     alignItems: 'center',
     justifyContent: 'center',
     borderRadius: 18,
     borderWidth: 1,
+    borderColor: smokeColors.border,
+    backgroundColor: smokeColors.surfaceAlt,
+    paddingHorizontal: 14,
+    paddingVertical: 10,
+    gap: 10,
+  },
+  dropdownButtonActive: {
     borderColor: smokeColors.orange,
-    backgroundColor: '#120B08',
-    padding: 12,
+    backgroundColor: '#2A150D',
+  },
+  dropdownHeaderText: {
+    flex: 1,
+    gap: 4,
   },
   dropdownTitle: {
-    color: smokeColors.muted,
-    fontSize: 12,
-    fontWeight: '800',
-    ...centerBlockText,
-  },
-  dropdownValue: {
     color: smokeColors.text,
-    fontSize: 19,
+    fontSize: 18,
+    fontWeight: '900',
+    ...rtlText,
+  },
+  dropdownSubtitle: {
+    color: smokeColors.muted,
+    fontSize: 13,
+    lineHeight: 18,
+    ...rtlText,
+  },
+  dropdownIcon: {
+    width: 34,
+    color: smokeColors.orange,
+    fontSize: 30,
+    fontWeight: '900',
+    lineHeight: 32,
+    ...centerText,
+  },
+  dropdownPanel: {
+    gap: 8,
+    borderRadius: 18,
+    borderWidth: 1,
+    borderColor: smokeColors.border,
+    backgroundColor: '#100A07',
+    padding: 10,
+  },
+  beefLegend: {
+    gap: 8,
+    borderRadius: 15,
+    backgroundColor: '#17100D',
+    padding: 10,
+  },
+  beefLegendTitle: {
+    color: smokeColors.gold,
+    fontSize: 13,
     fontWeight: '900',
     ...centerBlockText,
   },
-  cutList: {
-    gap: 8,
+  legendGrid: {
+    ...rtlRow,
+    flexWrap: 'wrap',
+    gap: 7,
+    justifyContent: 'center',
+  },
+  legendItem: {
+    ...rtlRow,
+    alignItems: 'center',
+    gap: 5,
+    borderRadius: 999,
+    borderWidth: 1,
+    borderColor: smokeColors.border,
+    backgroundColor: smokeColors.surface,
+    paddingHorizontal: 9,
+    paddingVertical: 6,
+  },
+  legendItemActive: {
+    borderColor: smokeColors.orange,
+    backgroundColor: '#2A150D',
+  },
+  legendNumber: {
+    color: smokeColors.gold,
+    fontSize: 12,
+    fontWeight: '900',
+    ...centerText,
+  },
+  legendNumberActive: {
+    color: smokeColors.orange,
+  },
+  legendName: {
+    color: smokeColors.muted,
+    fontSize: 12,
+    fontWeight: '800',
+    ...rtlText,
+  },
+  legendNameActive: {
+    color: smokeColors.text,
   },
   cutOption: {
     gap: 5,
@@ -466,5 +480,6 @@ const styles = StyleSheet.create({
   },
   actions: {
     gap: 12,
+    marginBottom: 24,
   },
 });

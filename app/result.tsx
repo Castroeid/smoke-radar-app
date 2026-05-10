@@ -8,7 +8,7 @@ import { AppScreen } from '@/components/AppScreen';
 import { SectionTitle } from '@/components/SectionTitle';
 import { SmokeImage } from '@/components/SmokeImage';
 import { smokeImages } from '@/constants/smokeImages';
-import { centerBlockText, rtlRow, rtlText, smokeColors } from '@/constants/smokeTheme';
+import { centerBlockText, centerText, rtlRow, rtlText, smokeColors } from '@/constants/smokeTheme';
 import { saveRecipe } from '@/services/savedRecipes';
 import type { ExpertAnswer, RecipeResult, RecipeSauce, RecipeSideDish } from '@/services/smokeRadarTypes';
 
@@ -442,7 +442,7 @@ const styles = StyleSheet.create({
     color: smokeColors.orange,
     fontSize: 17,
     fontWeight: '900',
-    textAlign: 'center',
+    ...centerText,
   },
   itemText: {
     flex: 1,
@@ -479,7 +479,7 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: '900',
     lineHeight: 28,
-    textAlign: 'center',
+    ...centerText,
   },
   infoTitle: {
     flex: 1,
@@ -515,7 +515,7 @@ const styles = StyleSheet.create({
     color: smokeColors.orange,
     fontSize: 24,
     fontWeight: '900',
-    textAlign: 'center',
+    ...centerText,
   },
   sideTitle: {
     flex: 1,

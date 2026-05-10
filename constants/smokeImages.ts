@@ -3,9 +3,10 @@ const smokePitmasterExpert = require('../assets/images/smoke-pitmaster-expert.pn
 const smokeChoiceCuts = require('../assets/images/smoke-choice-cuts.jpg');
 const smokeAsadoResult = require('../assets/images/smoke-asado-result.jpg');
 const smokeStewResult = require('../assets/images/smoke-stew-result.jpg');
+const smokeHeroBanner = require('../assets/images/smoke-hero-banner.jpg');
 
 export const smokeImages = {
-  hero: 'https://images.unsplash.com/photo-1529692236671-f1f6cf9683ba?auto=format&fit=crop&w=1200&q=80',
+  hero: smokeHeroBanner,
   smoker: 'https://images.unsplash.com/photo-1558030006-450675393462?auto=format&fit=crop&w=1200&q=80',
   butcher: smokeMapPois,
   butcherShop: 'https://images.unsplash.com/photo-1759803430575-2929b70c5d42?auto=format&fit=crop&w=1200&q=80',
