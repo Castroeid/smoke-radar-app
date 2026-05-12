@@ -1,22 +1,16 @@
 export type ApiMode = 'mock' | 'real';
 
-const env = globalThis as typeof globalThis & {
-  process?: {
-    env?: Record<string, string | undefined>;
-  };
-};
-
-function readEnv(key: string) {
-  return env.process?.env?.[key];
-}
+const fallbackApiUrl = 'https://smoke-radar-app.onrender.com';
+const apiMode = process.env.EXPO_PUBLIC_SMOKE_RADAR_API_MODE;
+const apiUrl = process.env.EXPO_PUBLIC_SMOKE_RADAR_API_URL;
 
 function cleanBaseUrl(url?: string) {
   return url?.trim().replace(/\/+$/, '') ?? '';
 }
 
 export const smokeRadarApiConfig = {
-  mode: readEnv('EXPO_PUBLIC_SMOKE_RADAR_API_MODE') === 'real' ? 'real' : 'mock',
-  baseUrl: cleanBaseUrl(readEnv('EXPO_PUBLIC_SMOKE_RADAR_API_URL')),
+  mode: apiMode === 'mock' ? 'mock' : 'real',
+  baseUrl: cleanBaseUrl(apiUrl || fallbackApiUrl),
   timeoutMs: 90000,
 } satisfies {
   mode: ApiMode;
