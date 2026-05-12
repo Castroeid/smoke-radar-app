@@ -8,7 +8,7 @@ import { Platform, Pressable, StyleSheet, Text, View } from 'react-native';
 import 'react-native-reanimated';
 
 import { smokeImages } from '@/constants/smokeImages';
-import { rtlRow, rtlText, rtlView, smokeColors } from '@/constants/smokeTheme';
+import { rtlText, rtlView, smokeColors } from '@/constants/smokeTheme';
 
 const smokeTheme = {
   ...DarkTheme,
@@ -89,24 +89,26 @@ function RtlHeader({ title, canGoBack, onBack }: { title: string; canGoBack: boo
 
 const styles = StyleSheet.create({
   header: {
-    ...rtlRow,
-    alignItems: 'center',
-    justifyContent: 'space-between',
     borderBottomWidth: 1,
     borderBottomColor: '#120B08',
     backgroundColor: smokeColors.background,
     paddingTop: 50,
-    paddingHorizontal: 18,
+    paddingLeft: 68,
+    paddingRight: 18,
     paddingBottom: 12,
   },
   headerTitle: {
-    flex: 1,
     color: smokeColors.text,
     fontSize: 18,
     fontWeight: '800',
+    minHeight: 44,
+    lineHeight: 44,
     ...rtlText,
   },
   backButton: {
+    position: 'absolute',
+    left: 14,
+    bottom: 12,
     width: 44,
     height: 44,
     alignItems: 'center',

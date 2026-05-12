@@ -23,6 +23,7 @@ export function AppButton({ title, onPress, variant = 'primary', style, icon }: 
 const styles = StyleSheet.create({
   button: {
     ...rtlRow,
+    alignSelf: 'stretch',
     minHeight: 58,
     alignItems: 'center',
     justifyContent: 'center',

@@ -1,8 +1,9 @@
-import { I18nManager, Platform, type TextStyle, type ViewStyle } from 'react-native';
+import { I18nManager, type TextStyle, type ViewStyle } from 'react-native';
 
 void I18nManager.allowRTL(true);
-void I18nManager.forceRTL(true);
-void I18nManager.swapLeftAndRightInRTL(true);
+void I18nManager.swapLeftAndRightInRTL(false);
+
+const nativeRtlLayout = I18nManager.isRTL;
 
 export const smokeColors = {
   background: '#080605',
@@ -39,11 +40,7 @@ export const centerBlockText = {
   alignSelf: 'stretch' as const,
 } satisfies TextStyle;
 
-export const rtlView = (Platform.OS === 'web'
-  ? {}
-  : {
-      direction: 'rtl',
-    }) as ViewStyle;
+export const rtlView = {} as ViewStyle;
 
 export const rtlContent = {
   ...rtlView,
@@ -52,7 +49,7 @@ export const rtlContent = {
 
 export const rtlRow = {
   ...rtlView,
-  flexDirection: 'row-reverse' as const,
+  flexDirection: nativeRtlLayout ? ('row' as const) : ('row-reverse' as const),
 };
 
 export const screenPadding = 20;

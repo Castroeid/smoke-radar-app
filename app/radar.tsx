@@ -8,7 +8,7 @@ import { AppScreen } from '@/components/AppScreen';
 import { SectionTitle } from '@/components/SectionTitle';
 import { SmokeImage } from '@/components/SmokeImage';
 import { smokeImages } from '@/constants/smokeImages';
-import { centerBlockText, centerText, rtlText, smokeColors } from '@/constants/smokeTheme';
+import { centerBlockText, centerText, rtlRow, rtlText, smokeColors } from '@/constants/smokeTheme';
 import { getTrendingCuts, type RadarCut } from '@/services/smokeRadarService';
 
 export default function RadarScreen() {
@@ -112,7 +112,7 @@ const styles = StyleSheet.create({
   },
   infoButton: {
     alignSelf: 'center',
-    flexDirection: 'row-reverse',
+    ...rtlRow,
     alignItems: 'center',
     gap: 8,
     borderRadius: 999,

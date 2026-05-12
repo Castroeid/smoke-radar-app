@@ -16,6 +16,8 @@ export function AppCard({ children, style, elevated = false }: AppCardProps) {
 const styles = StyleSheet.create({
   card: {
     ...rtlView,
+    alignSelf: 'stretch',
+    width: '100%',
     gap: 12,
     borderRadius: 22,
     borderWidth: 1,
