@@ -1,9 +1,8 @@
 import { I18nManager, type TextStyle, type ViewStyle } from 'react-native';
 
-void I18nManager.allowRTL(true);
+void I18nManager.allowRTL(false);
+void I18nManager.forceRTL(false);
 void I18nManager.swapLeftAndRightInRTL(false);
-
-const nativeRtlLayout = I18nManager.isRTL;
 
 export const smokeColors = {
   background: '#080605',
@@ -20,6 +19,7 @@ export const smokeColors = {
 };
 
 export const rtlText = {
+  alignSelf: 'stretch' as const,
   textAlign: 'right' as const,
   writingDirection: 'rtl' as const,
 } satisfies TextStyle;
@@ -49,7 +49,7 @@ export const rtlContent = {
 
 export const rtlRow = {
   ...rtlView,
-  flexDirection: nativeRtlLayout ? ('row' as const) : ('row-reverse' as const),
+  flexDirection: 'row-reverse' as const,
 };
 
 export const screenPadding = 20;

@@ -196,7 +196,6 @@ const styles = StyleSheet.create({
     color: smokeColors.text,
     fontSize: 16,
     lineHeight: 23,
-    alignSelf: 'stretch',
     ...rtlText,
   },
   itemDone: {

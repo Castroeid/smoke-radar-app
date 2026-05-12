@@ -450,7 +450,6 @@ const styles = StyleSheet.create({
     color: smokeColors.text,
     fontSize: 15,
     lineHeight: 23,
-    alignSelf: 'stretch',
     ...rtlText,
   },
   infoCard: {
