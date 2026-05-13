@@ -2,8 +2,9 @@ import { createServer } from 'node:http';
 
 import { answerExpertWithAi, generateRecipeWithAi } from './aiService.js';
 import { trendingCuts } from './mockData.js';
-import { readJson, sendJson, sendOptions } from './http.js';
+import { readJson, sendHtml, sendJson, sendOptions } from './http.js';
 import { findButchersWithPlaces } from './placesService.js';
+import { privacyPolicyHtml } from './privacyPolicy.js';
 
 export async function route(req, res) {
   const url = new URL(req.url ?? '/', `http://${req.headers.host ?? 'localhost'}`);
@@ -19,6 +20,11 @@ export async function route(req, res) {
 
   if (req.method === 'GET' && url.pathname === '/health') {
     sendJson(res, 200, { ok: true, service: 'smoke-radar-api' });
+    return;
+  }
+
+  if (req.method === 'GET' && (url.pathname === '/privacy' || url.pathname === '/privacy-policy')) {
+    sendHtml(res, 200, privacyPolicyHtml);
     return;
   }
 

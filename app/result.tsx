@@ -9,6 +9,7 @@ import { SectionTitle } from '@/components/SectionTitle';
 import { SmokeImage } from '@/components/SmokeImage';
 import { smokeImages } from '@/constants/smokeImages';
 import { centerBlockText, centerText, rtlRow, rtlText, smokeColors } from '@/constants/smokeTheme';
+import { openFeedback } from '@/services/feedback';
 import { saveRecipe } from '@/services/savedRecipes';
 import type { ExpertAnswer, RecipeResult, RecipeSauce, RecipeSideDish } from '@/services/smokeRadarTypes';
 
@@ -43,6 +44,7 @@ export default function ResultScreen() {
   const parsedPayload = useMemo(() => parsePayload(payload), [payload]);
   const heroImage = getResultImage(source, parsedPayload, selectedCut);
   const [saveState, setSaveState] = useState('');
+  const expertAnswer = source === 'expert' && parsedPayload ? (parsedPayload as ExpertAnswer) : null;
 
   return (
     <AppScreen>
@@ -73,6 +75,36 @@ export default function ResultScreen() {
           <AppButton title="נסו שוב" variant="secondary" onPress={tryAgain} style={styles.actionButton} />
           <AppButton title="חזרו לרדאר" onPress={() => router.push('/radar')} style={styles.actionButton} />
         </View>
+        {expertAnswer ? (
+          <>
+            <AppButton
+              title="שאלת המשך"
+              variant="secondary"
+              onPress={() =>
+                router.push({
+                  pathname: '/expert',
+                  params: {
+                    meat: selectedCut,
+                    question: `בהמשך לתשובה שלך על ${selectedCut}, רציתי לשאול: `,
+                  },
+                })
+              }
+            />
+            <AppButton
+              title="חוללו מתכון לפי הכיוון"
+              onPress={() =>
+                router.push({
+                  pathname: '/recipe',
+                  params: {
+                    meat: selectedCut,
+                    guidance: `${expertAnswer.question}\n${expertAnswer.answer}`.slice(0, 800),
+                  },
+                })
+              }
+            />
+          </>
+        ) : null}
+        <AppButton title="שלחו משוב" variant="ghost" onPress={() => openFeedback(source ?? 'result')} />
         {source !== 'recipe' ? <AppButton title="שתפו" variant="ghost" onPress={shareResult} /> : null}
       </AppCard>
     </AppScreen>

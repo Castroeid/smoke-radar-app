@@ -28,6 +28,16 @@ export function sendJson(res, statusCode, payload) {
   res.end(JSON.stringify(payload));
 }
 
+export function sendHtml(res, statusCode, html) {
+  res.writeHead(statusCode, {
+    'Content-Type': 'text/html; charset=utf-8',
+    'Access-Control-Allow-Origin': '*',
+    'Access-Control-Allow-Methods': 'GET,POST,OPTIONS',
+    'Access-Control-Allow-Headers': 'Content-Type,Authorization',
+  });
+  res.end(html);
+}
+
 export function sendOptions(res) {
   res.writeHead(204, {
     'Access-Control-Allow-Origin': '*',

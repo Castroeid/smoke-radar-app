@@ -12,6 +12,7 @@ export type RecipeRequest = {
   effort: string;
   kosherPreference: string;
   seasoningStyle: string;
+  expertGuidance?: string;
 };
 
 export type RecipeSideDish = {

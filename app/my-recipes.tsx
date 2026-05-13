@@ -9,7 +9,7 @@ import { SectionTitle } from '@/components/SectionTitle';
 import { SmokeImage } from '@/components/SmokeImage';
 import { smokeImages } from '@/constants/smokeImages';
 import { centerBlockText, rtlText, smokeColors } from '@/constants/smokeTheme';
-import { getSavedRecipes } from '@/services/savedRecipes';
+import { deleteSavedRecipe, getSavedRecipes } from '@/services/savedRecipes';
 import type { RecipeResult } from '@/services/smokeRadarTypes';
 
 export default function MyRecipesScreen() {
@@ -18,6 +18,11 @@ export default function MyRecipesScreen() {
   useEffect(() => {
     getSavedRecipes().then(setRecipes);
   }, []);
+
+  const deleteRecipe = async (title: string) => {
+    const next = await deleteSavedRecipe(title);
+    setRecipes(next);
+  };
 
   return (
     <AppScreen>
@@ -46,6 +51,7 @@ export default function MyRecipesScreen() {
                   })
                 }
               />
+              <AppButton title="מחקו מתכון" variant="ghost" onPress={() => deleteRecipe(recipe.title)} />
             </AppCard>
           ))}
         </View>

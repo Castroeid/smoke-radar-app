@@ -56,6 +56,25 @@ export async function getSavedRecipes() {
   return memoryStore;
 }
 
+export async function deleteSavedRecipe(title: string) {
+  const userId = await getCurrentUserId();
+  const existing = await getSavedRecipes();
+  const next = existing.filter((item) => item.title !== title);
+
+  if (Platform.OS === 'web' && hasLocalStorage()) {
+    globalThis.localStorage.setItem(getSavedRecipesKey(userId), JSON.stringify(next));
+    return next;
+  }
+
+  if (FileSystem.documentDirectory) {
+    await FileSystem.writeAsStringAsync(getSavedRecipesFile(userId), JSON.stringify(next));
+    return next;
+  }
+
+  memoryStore.splice(0, memoryStore.length, ...next);
+  return next;
+}
+
 function getSavedRecipesKey(userId: string) {
   return `${savedRecipesKeyPrefix}:${userId}`;
 }

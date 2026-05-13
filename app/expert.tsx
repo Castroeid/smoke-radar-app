@@ -12,9 +12,9 @@ import { centerBlockText, rtlRow, rtlText, smokeColors } from '@/constants/smoke
 import { askExpert } from '@/services/smokeRadarService';
 
 export default function ExpertScreen() {
-  const { meat } = useLocalSearchParams<{ meat?: string }>();
+  const { meat, question: initialQuestion } = useLocalSearchParams<{ meat?: string; question?: string }>();
   const selectedCut = typeof meat === 'string' && meat.length > 0 ? meat : 'הנתח שבחרתם';
-  const [question, setQuestion] = useState('');
+  const [question, setQuestion] = useState(typeof initialQuestion === 'string' ? initialQuestion : '');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 

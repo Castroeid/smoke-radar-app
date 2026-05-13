@@ -38,9 +38,10 @@ const seasoningDescriptions: Record<string, string> = {
 };
 
 export default function RecipeScreen() {
-  const { meat } = useLocalSearchParams<{ meat?: string }>();
+  const { meat, guidance } = useLocalSearchParams<{ meat?: string; guidance?: string }>();
   const selectedTrend = typeof meat === 'string' && meat.length > 0 ? meat : 'אסאדו';
   const selectedCut = normalizeCutName(selectedTrend);
+  const expertGuidance = typeof guidance === 'string' ? guidance : '';
   const [step, setStep] = useState(1);
   const [method, setMethod] = useState(methods[0]);
   const [effort, setEffort] = useState(efforts[1]);
@@ -54,7 +55,7 @@ export default function RecipeScreen() {
     setError('');
 
     try {
-      const recipe = await generateRecipe({ cut: selectedCut, method, effort, kosherPreference, seasoningStyle });
+      const recipe = await generateRecipe({ cut: selectedCut, method, effort, kosherPreference, seasoningStyle, expertGuidance });
       router.push({ pathname: '/result', params: { source: 'recipe', payload: JSON.stringify(recipe), meat: selectedCut } });
     } catch {
       setError('לא הצלחנו ליצור מתכון כרגע. נסו שוב בעוד רגע.');
@@ -68,7 +69,7 @@ export default function RecipeScreen() {
       <SectionTitle
         eyebrow="מחולל מתכונים"
         title="בונים מנה בכמה נגיעות"
-        subtitle={`הנתח שנבחר: ${selectedCut}`}
+        subtitle={`הנתח שנבחר: ${selectedCut}${expertGuidance ? ' | כולל כיוון מהפיטמאסטר' : ''}`}
       />
 
       <SmokeImage source={smokeImages.choiceCuts} height={140} />

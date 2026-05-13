@@ -21,6 +21,12 @@ try {
   assert.ok(trends.length > 0);
   assert.equal(typeof trends[0].title, 'string');
 
+  const privacyResponse = await fetch(`${baseUrl}/privacy`);
+  const privacy = await privacyResponse.text();
+  assert.equal(privacyResponse.status, 200);
+  assert.match(privacyResponse.headers.get('content-type') ?? '', /text\/html/);
+  assert.match(privacy, /Smoke Radar/);
+
   const recipeResponse = await fetch(`${baseUrl}/recipes/generate`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },

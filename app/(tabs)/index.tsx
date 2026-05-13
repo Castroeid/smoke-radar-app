@@ -9,6 +9,7 @@ import { SmokePulse } from '@/components/SmokePulse';
 import { SmokeImage } from '@/components/SmokeImage';
 import { smokeImages } from '@/constants/smokeImages';
 import { centerBlockText, smokeColors } from '@/constants/smokeTheme';
+import { openFeedback, openPrivacyPolicy } from '@/services/feedback';
 
 export default function HomeScreen() {
   const intro = useRef(new Animated.Value(0)).current;
@@ -42,6 +43,8 @@ export default function HomeScreen() {
         <Text style={styles.cardText}>סרקו טרנדים, בחרו מנה, וקבלו מסלול מהיר למתכון, פיטמאסטר או קצבייה.</Text>
         <AppButton title="התחילו" onPress={() => router.push('/radar')} />
         <AppButton title="המתכונים שלי" variant="secondary" onPress={() => router.push('/my-recipes' as never)} />
+        <AppButton title="שלחו משוב" variant="ghost" onPress={() => openFeedback('home')} />
+        <AppButton title="מדיניות פרטיות" variant="ghost" onPress={openPrivacyPolicy} />
       </AppCard>
       </Animated.View>
     </AppScreen>
