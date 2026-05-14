@@ -17,7 +17,6 @@
     },
     "android": {
       "package": "com.castroeid.smokeradar",
-      "supportsRTL": true,
       "permissions": [
         "ACCESS_COARSE_LOCATION",
         "ACCESS_FINE_LOCATION",
