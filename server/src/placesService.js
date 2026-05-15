@@ -2,25 +2,19 @@ import { butchers } from './mockData.js';
 
 const nearbySearchUrl = 'https://maps.googleapis.com/maps/api/place/nearbysearch/json';
 const textSearchUrl = 'https://maps.googleapis.com/maps/api/place/textsearch/json';
+const newNearbySearchUrl = 'https://places.googleapis.com/v1/places:searchNearby';
 const newTextSearchUrl = 'https://places.googleapis.com/v1/places:searchText';
 const overpassSearchUrl = 'https://overpass-api.de/api/interpreter';
 const defaultLocation = { lat: 32.0853, lng: 34.7818 };
-const searchRadiusMeters = 45000;
+const primarySearchRadiusMeters = 12000;
+const searchRadiusMeters = 35000;
 const maxButcherResults = 10;
-const butcherSearchQueries = [
-  'קצבייה',
-  'קצביה',
-  'אטליז',
-  'חנות בשר',
-  'בשר טרי',
-  'butcher shop',
-  'meat market',
-];
+const butcherSearchQueries = ['קצבייה', 'קצביה', 'אטליז', 'חנות בשר', 'בשר טרי', 'butcher shop', 'meat market'];
 
 export async function findButchersWithPlaces({ lat, lng } = {}) {
   if (!process.env.GOOGLE_PLACES_API_KEY) {
     console.warn('Butcher lookup fallback: missing GOOGLE_PLACES_API_KEY');
-    return markFallbackButchers('אין מפתח גוגל פעיל בשרת.');
+    return markFallbackButchers('אין מפתח Google Places פעיל בשרת.');
   }
 
   const location = {
@@ -31,37 +25,89 @@ export async function findButchersWithPlaces({ lat, lng } = {}) {
   try {
     console.log('Butcher lookup started:', location);
 
-    const newTextResults = await searchNewTextButchers(location);
-    console.log('Butcher lookup Google Places New count:', newTextResults.length);
-    if (newTextResults.length > 0) {
-      return newTextResults;
-    }
+    const [newNearbyResults, newTextResults, nearbyResults, textResults, openStreetMapResults] = await Promise.all([
+      searchNewNearbyButchers(location),
+      searchNewTextButchers(location),
+      searchNearbyButchers(location),
+      searchTextButchers(location),
+      searchOpenStreetMapButchers(location),
+    ]);
 
-    const nearbyResults = await searchNearbyButchers(location);
-    console.log('Butcher lookup Google nearby count:', nearbyResults.length);
-    if (nearbyResults.length > 0) {
-      return nearbyResults;
-    }
+    console.log('Butcher lookup counts:', {
+      newNearby: newNearbyResults.length,
+      newText: newTextResults.length,
+      nearby: nearbyResults.length,
+      text: textResults.length,
+      osm: openStreetMapResults.length,
+    });
 
-    const textResults = await searchTextButchers(location);
-    console.log('Butcher lookup Google text count:', textResults.length);
-    if (textResults.length > 0) {
-      return textResults;
-    }
+    const rankedResults = dedupeAndRankButchers([
+      ...newNearbyResults,
+      ...newTextResults,
+      ...nearbyResults,
+      ...textResults,
+      ...openStreetMapResults,
+    ]).slice(0, maxButcherResults);
 
-    const openStreetMapResults = await searchOpenStreetMapButchers(location);
-    console.log('Butcher lookup OpenStreetMap count:', openStreetMapResults.length);
-    if (openStreetMapResults.length > 0) {
-      console.warn('Using OpenStreetMap butcher results after empty Google Places response:', openStreetMapResults.length);
-      return openStreetMapResults;
+    if (rankedResults.length > 0) {
+      console.log(
+        'Butcher lookup selected:',
+        rankedResults.map((item) => ({
+          name: item.name,
+          distanceMeters: item.distanceMeters,
+          rating: item.rating,
+          ratingCount: item.ratingCount,
+          source: item.source,
+        }))
+      );
+      return rankedResults;
     }
 
     console.warn('Google Places returned no butcher results near location:', location);
-    return markFallbackButchers('גוגל לא החזיר תוצאות באזור הזה.');
+    return markFallbackButchers('Google לא החזיר תוצאות באזור הזה.');
   } catch (error) {
     console.warn('Falling back to mock butchers:', error.message);
-    return markFallbackButchers('החיבור לגוגל נכשל זמנית.');
+    return markFallbackButchers('החיבור לשירותי מפה נכשל זמנית.');
   }
+}
+
+async function searchNewNearbyButchers(location) {
+  const response = await fetch(newNearbySearchUrl, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'X-Goog-Api-Key': process.env.GOOGLE_PLACES_API_KEY,
+      'X-Goog-FieldMask':
+        'places.id,places.displayName,places.formattedAddress,places.location,places.rating,places.userRatingCount,places.googleMapsUri,places.businessStatus,places.primaryType,places.types',
+    },
+    body: JSON.stringify({
+      includedTypes: ['butcher_shop'],
+      maxResultCount: 20,
+      rankPreference: 'DISTANCE',
+      languageCode: 'he',
+      regionCode: 'IL',
+      locationRestriction: {
+        circle: {
+          center: {
+            latitude: location.lat,
+            longitude: location.lng,
+          },
+          radius: primarySearchRadiusMeters,
+        },
+      },
+    }),
+  });
+
+  const data = await response.json().catch(() => ({}));
+
+  if (!response.ok) {
+    console.warn('Google Places New nearby search failed:', response.status, data.error?.message ?? '');
+    return [];
+  }
+
+  return (data.places ?? [])
+    .filter((place) => place.businessStatus !== 'CLOSED_PERMANENTLY')
+    .map((place) => mapNewPlaceToButcher(place, location, 'new-nearby'));
 }
 
 async function searchNewTextButchers(location) {
@@ -79,21 +125,21 @@ async function searchNewTextQuery(textQuery, location) {
       'Content-Type': 'application/json',
       'X-Goog-Api-Key': process.env.GOOGLE_PLACES_API_KEY,
       'X-Goog-FieldMask':
-        'places.id,places.displayName,places.formattedAddress,places.location,places.rating,places.userRatingCount,places.googleMapsUri,places.businessStatus',
+        'places.id,places.displayName,places.formattedAddress,places.location,places.rating,places.userRatingCount,places.googleMapsUri,places.businessStatus,places.primaryType,places.types',
     },
     body: JSON.stringify({
       textQuery,
       languageCode: 'he',
       regionCode: 'IL',
-      pageSize: 10,
-      rankPreference: 'RELEVANCE',
+      pageSize: 12,
+      rankPreference: 'DISTANCE',
       locationBias: {
         circle: {
           center: {
             latitude: location.lat,
             longitude: location.lng,
           },
-          radius: searchRadiusMeters,
+          radius: primarySearchRadiusMeters,
         },
       },
     }),
@@ -108,7 +154,8 @@ async function searchNewTextQuery(textQuery, location) {
 
   return (data.places ?? [])
     .filter((place) => place.businessStatus !== 'CLOSED_PERMANENTLY')
-    .map((place) => mapNewPlaceToButcher(place, location));
+    .filter((place) => looksLikeButcher(place))
+    .map((place) => mapNewPlaceToButcher(place, location, 'new-text'));
 }
 
 async function searchNearbyButchers(location) {
@@ -116,8 +163,8 @@ async function searchNearbyButchers(location) {
     butcherSearchQueries.map((keyword) => {
       const url = new URL(nearbySearchUrl);
       url.searchParams.set('location', `${location.lat},${location.lng}`);
-      url.searchParams.set('radius', String(searchRadiusMeters));
       url.searchParams.set('keyword', keyword);
+      url.searchParams.set('rankby', 'distance');
       url.searchParams.set('language', 'he');
       url.searchParams.set('key', process.env.GOOGLE_PLACES_API_KEY);
 
@@ -134,7 +181,7 @@ async function searchTextButchers(location) {
       const url = new URL(textSearchUrl);
       url.searchParams.set('query', textQuery);
       url.searchParams.set('location', `${location.lat},${location.lng}`);
-      url.searchParams.set('radius', String(searchRadiusMeters));
+      url.searchParams.set('radius', String(primarySearchRadiusMeters));
       url.searchParams.set('language', 'he');
       url.searchParams.set('key', process.env.GOOGLE_PLACES_API_KEY);
 
@@ -184,10 +231,12 @@ async function fetchPlaces(url, location, searchType) {
     return [];
   }
 
-  return (data.results ?? []).map((place) => mapPlaceToButcher(place, location, searchType));
+  return (data.results ?? [])
+    .filter((place) => place.business_status !== 'CLOSED_PERMANENTLY')
+    .map((place) => mapPlaceToButcher(place, location, searchType));
 }
 
-function mapNewPlaceToButcher(place, location) {
+function mapNewPlaceToButcher(place, location, searchType) {
   const placeLocation = place.location ? { lat: place.location.latitude, lng: place.location.longitude } : undefined;
   const distanceMeters = placeLocation ? calculateDistanceMeters(location, placeLocation) : undefined;
 
@@ -197,7 +246,7 @@ function mapNewPlaceToButcher(place, location) {
     rating: place.rating ? String(place.rating) : 'חדש',
     ratingCount: place.userRatingCount ?? 0,
     address: place.formattedAddress ?? 'כתובת לא זמינה',
-    reviewHighlight: buildReviewHighlight({ user_ratings_total: place.userRatingCount }, distanceMeters, 'new-text'),
+    reviewHighlight: buildReviewHighlight({ user_ratings_total: place.userRatingCount }, distanceMeters, searchType),
     mapsUrl:
       place.googleMapsUri ??
       `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(place.displayName?.text ?? 'קצבייה')}`,
@@ -242,7 +291,7 @@ function mapOpenStreetMapElementToButcher(element, location) {
     address: formatOpenStreetMapAddress(tags, placeLocation),
     reviewHighlight: `כ-${formatDistance(distanceMeters)} מהמיקום שלכם. נמצאה במאגר OpenStreetMap לפי המיקום. מומלץ לבדוק זמינות ונתחים לפני ההגעה.`,
     mapsUrl: `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(`${name} ${placeLocation.lat},${placeLocation.lng}`)}`,
-    source: 'google',
+    source: 'osm',
     distanceMeters,
   };
 }
@@ -251,11 +300,13 @@ function buildReviewHighlight(place, distanceMeters, searchType) {
   const distanceText = distanceMeters ? `כ-${formatDistance(distanceMeters)} מהמיקום שלכם. ` : '';
   const ratingText = place.user_ratings_total ? `${place.user_ratings_total} דירוגים בגוגל. ` : '';
   const searchText =
-    searchType === 'new-text'
-      ? 'נמצאה בחיפוש Google Places לפי האזור. '
-      : searchType === 'text'
-        ? 'נמצאה בחיפוש טקסט לפי האזור. '
-        : 'נמצאה בחיפוש קרוב לפי האזור. ';
+    searchType === 'new-nearby'
+      ? 'נמצאה בחיפוש קצביות סמוכות של Google Places. '
+      : searchType === 'new-text'
+        ? 'נמצאה בחיפוש Google Places לפי האזור. '
+        : searchType === 'text'
+          ? 'נמצאה בחיפוש טקסט לפי האזור. '
+          : 'נמצאה בחיפוש קרוב לפי האזור. ';
 
   return `${distanceText}${ratingText}${searchText}מומלץ לבדוק זמינות ונתחים לפני ההגעה.`;
 }
@@ -290,7 +341,7 @@ function isWithinSearchRadius(item) {
 }
 
 function buildOpenStreetMapQuery(location) {
-  const around = `(around:${searchRadiusMeters},${location.lat},${location.lng})`;
+  const around = `(around:${primarySearchRadiusMeters},${location.lat},${location.lng})`;
 
   return `
 [out:json][timeout:10];
@@ -347,17 +398,36 @@ function sortButchersByTrust(first, second) {
 function weightedButcherScore(butcher) {
   const rating = Number.parseFloat(butcher.rating);
   const ratingCount = Number(butcher.ratingCount ?? 0);
+  const distanceMeters = Number(butcher.distanceMeters ?? searchRadiusMeters);
 
   if (!Number.isFinite(rating) || ratingCount <= 0) {
-    return 0;
+    return Number.isFinite(distanceMeters) ? Math.max(0, 3.6 - distanceMeters / 10000) : 0;
   }
 
   const baselineRating = 4.2;
   const baselineCount = 30;
   const bayesianRating = (rating * ratingCount + baselineRating * baselineCount) / (ratingCount + baselineCount);
   const confidenceBoost = Math.min(0.35, Math.log10(ratingCount + 1) * 0.08);
+  const distanceKm = Number.isFinite(distanceMeters) ? distanceMeters / 1000 : searchRadiusMeters / 1000;
+  const distancePenalty = Math.min(0.9, Math.log1p(distanceKm) * 0.22);
 
-  return bayesianRating + confidenceBoost;
+  return bayesianRating + confidenceBoost - distancePenalty;
+}
+
+function looksLikeButcher(place) {
+  const typeText = [...(place.types ?? []), place.primaryType ?? ''].join(' ').toLowerCase();
+  const nameText = place.displayName?.text ?? '';
+  const addressText = place.formattedAddress ?? '';
+  const text = `${nameText} ${addressText}`.toLowerCase();
+
+  return (
+    typeText.includes('butcher_shop') ||
+    text.includes('קצב') ||
+    text.includes('אטליז') ||
+    text.includes('בשר') ||
+    text.includes('butcher') ||
+    text.includes('meat')
+  );
 }
 
 function calculateDistanceMeters(from, to) {
@@ -382,5 +452,5 @@ function formatDistance(distanceMeters) {
     return `${distanceMeters} מטר`;
   }
 
-  return `${(distanceMeters / 1000).toFixed(1)} ק״מ`;
+  return `${(distanceMeters / 1000).toFixed(1)} ק"מ`;
 }

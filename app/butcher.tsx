@@ -191,15 +191,18 @@ function rankButchers(items: Butcher[]) {
 function weightedButcherScore(item: Butcher) {
   const rating = Number.parseFloat(item.rating);
   const ratingCount = Number(item.ratingCount ?? 0);
+  const distanceMeters = Number(item.distanceMeters ?? 35000);
 
   if (!Number.isFinite(rating) || ratingCount <= 0) {
-    return 0;
+    return Number.isFinite(distanceMeters) ? Math.max(0, 3.6 - distanceMeters / 10000) : 0;
   }
 
   const baselineRating = 4.2;
   const baselineCount = 30;
   const bayesianRating = (rating * ratingCount + baselineRating * baselineCount) / (ratingCount + baselineCount);
   const confidenceBoost = Math.min(0.35, Math.log10(ratingCount + 1) * 0.08);
+  const distanceKm = Number.isFinite(distanceMeters) ? distanceMeters / 1000 : 35;
+  const distancePenalty = Math.min(0.9, Math.log1p(distanceKm) * 0.22);
 
-  return bayesianRating + confidenceBoost;
+  return bayesianRating + confidenceBoost - distancePenalty;
 }

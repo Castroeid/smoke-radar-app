@@ -52,7 +52,7 @@ export type Butcher = {
   address: string;
   reviewHighlight: string;
   mapsUrl?: string;
-  source?: 'google' | 'fallback';
+  source?: 'google' | 'osm' | 'fallback';
   distanceMeters?: number;
   ratingCount?: number;
 };
