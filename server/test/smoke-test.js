@@ -47,6 +47,15 @@ try {
   assert.equal(expert.question, 'מתי עוטפים את הנתח?');
   assert.ok(expert.tips.length > 0);
 
+  const feedbackResponse = await fetch(`${baseUrl}/feedback`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ source: 'test', message: 'בדיקת משוב פנימי', platform: 'test' }),
+  });
+  const feedback = await feedbackResponse.json();
+  assert.equal(feedbackResponse.status, 200);
+  assert.equal(feedback.ok, true);
+
   const butchersResponse = await fetch(`${baseUrl}/butchers/nearby`);
   const butchers = await butchersResponse.json();
   assert.equal(butchersResponse.status, 200);

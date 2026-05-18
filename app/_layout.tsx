@@ -65,6 +65,7 @@ export default function RootLayout() {
         <Stack.Screen name="result" options={{ title: 'תוצאה' }} />
         <Stack.Screen name="shopping" options={{ title: 'רשימת קניות' }} />
         <Stack.Screen name="my-recipes" options={{ title: 'המתכונים שלי' }} />
+        <Stack.Screen name="feedback" options={{ title: 'שלחו משוב' }} />
         <Stack.Screen name="modal" options={{ title: 'מידע' }} />
       </Stack>
       <StatusBar style="light" backgroundColor={smokeColors.background} />

@@ -1,24 +1,24 @@
 import { Linking, Platform } from 'react-native';
 
-const feedbackEmail = 'castroeid@gmail.com';
+import { apiRequest } from '@/services/apiClient';
+import { smokeRadarEndpoints } from '@/services/apiConfig';
+
 const privacyPolicyUrl = 'https://smoke-radar-app.onrender.com/privacy';
 
-export function openFeedback(source: string) {
-  const subject = encodeURIComponent(`Smoke Radar feedback - ${source}`);
-  const body = encodeURIComponent(
-    [
-      'מה עבד טוב?',
-      '',
-      'מה היה חסר או מבלבל?',
-      '',
-      'באיזה מסך זה קרה?',
-      '',
-      `מקור: ${source}`,
-      `פלטפורמה: ${Platform.OS}`,
-    ].join('\n')
-  );
+export type FeedbackPayload = {
+  source: string;
+  message: string;
+  contact?: string;
+};
 
-  return Linking.openURL(`mailto:${feedbackEmail}?subject=${subject}&body=${body}`);
+export async function submitFeedback(payload: FeedbackPayload) {
+  return apiRequest<{ ok: boolean; id: string }>(smokeRadarEndpoints.feedback, {
+    method: 'POST',
+    body: {
+      ...payload,
+      platform: Platform.OS,
+    },
+  });
 }
 
 export function openPrivacyPolicy() {

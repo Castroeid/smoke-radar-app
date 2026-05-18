@@ -27,4 +27,5 @@ export const smokeRadarEndpoints = {
   recipe: '/recipes/generate',
   expert: '/expert/ask',
   butchers: '/butchers/nearby',
+  feedback: '/feedback',
 };

@@ -9,7 +9,6 @@ import { SectionTitle } from '@/components/SectionTitle';
 import { SmokeImage } from '@/components/SmokeImage';
 import { smokeImages } from '@/constants/smokeImages';
 import { centerBlockText, centerText, rtlRow, rtlText, smokeColors } from '@/constants/smokeTheme';
-import { openFeedback } from '@/services/feedback';
 import { saveRecipe } from '@/services/savedRecipes';
 import type { ExpertAnswer, RecipeResult, RecipeSauce, RecipeSideDish } from '@/services/smokeRadarTypes';
 
@@ -104,7 +103,7 @@ export default function ResultScreen() {
             />
           </>
         ) : null}
-        <AppButton title="שלחו משוב" variant="ghost" onPress={() => openFeedback(source ?? 'result')} />
+        <AppButton title="שלחו משוב" variant="ghost" onPress={() => router.push({ pathname: '/feedback' as never, params: { source: source ?? 'result' } })} />
         {source !== 'recipe' ? <AppButton title="שתפו" variant="ghost" onPress={shareResult} /> : null}
       </AppCard>
     </AppScreen>
