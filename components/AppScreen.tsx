@@ -1,5 +1,5 @@
 import { type ReactNode } from 'react';
-import { ScrollView, StyleSheet, View, type ViewStyle } from 'react-native';
+import { ScrollView, StyleSheet, View, type StyleProp, type ViewStyle } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { rtlContent, rtlView, screenPadding, smokeColors } from '@/constants/smokeTheme';
@@ -7,12 +7,12 @@ import { rtlContent, rtlView, screenPadding, smokeColors } from '@/constants/smo
 type AppScreenProps = {
   children: ReactNode;
   scroll?: boolean;
-  style?: ViewStyle;
+  style?: StyleProp<ViewStyle>;
 };
 
 export function AppScreen({ children, scroll = true, style }: AppScreenProps) {
   const insets = useSafeAreaInsets();
-  const bottomPadding = scroll ? Math.max(136, insets.bottom + 104) : Math.max(screenPadding, insets.bottom + screenPadding);
+  const bottomPadding = scroll ? Math.max(168, insets.bottom + 128) : Math.max(screenPadding + 20, insets.bottom + screenPadding + 20);
 
   if (!scroll) {
     return <View style={[styles.container, styles.content, { paddingBottom: bottomPadding }, style]}>{children}</View>;
