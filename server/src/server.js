@@ -65,6 +65,7 @@ export async function route(req, res) {
 
     console.log('Smoke Radar feedback:', JSON.stringify(feedback));
     await forwardFeedback(feedback);
+    await emailFeedback(feedback);
     sendJson(res, 200, { ok: true, id: feedback.id });
     return;
   }
@@ -106,4 +107,72 @@ async function forwardFeedback(feedback) {
   } catch (error) {
     console.error('Failed to forward Smoke Radar feedback:', error);
   }
+}
+
+async function emailFeedback(feedback) {
+  const apiKey = process.env.RESEND_API_KEY;
+
+  if (!apiKey) {
+    return;
+  }
+
+  const to = process.env.FEEDBACK_TO_EMAIL || 'castroeid@gmail.com';
+  const from = process.env.FEEDBACK_FROM_EMAIL || 'Smoke Radar <onboarding@resend.dev>';
+  const subject = `משוב חדש מ-Smoke Radar (${feedback.source})`;
+  const text = [
+    'משוב חדש מ-Smoke Radar',
+    '',
+    `מקור: ${feedback.source}`,
+    `פלטפורמה: ${feedback.platform}`,
+    `פרטי קשר: ${feedback.contact || 'לא נמסרו'}`,
+    `זמן: ${feedback.createdAt}`,
+    '',
+    feedback.message,
+  ].join('\n');
+
+  try {
+    const response = await fetch('https://api.resend.com/emails', {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${apiKey}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        from,
+        to,
+        subject,
+        text,
+        html: renderFeedbackEmail(feedback),
+      }),
+    });
+
+    if (!response.ok) {
+      console.error('Failed to email Smoke Radar feedback:', response.status, await response.text());
+    }
+  } catch (error) {
+    console.error('Failed to email Smoke Radar feedback:', error);
+  }
+}
+
+function renderFeedbackEmail(feedback) {
+  return `
+    <div dir="rtl" style="font-family:Arial,sans-serif;line-height:1.7;color:#241510">
+      <h2 style="color:#ff771f">משוב חדש מ-Smoke Radar</h2>
+      <p><strong>מקור:</strong> ${escapeHtml(feedback.source)}</p>
+      <p><strong>פלטפורמה:</strong> ${escapeHtml(feedback.platform)}</p>
+      <p><strong>פרטי קשר:</strong> ${escapeHtml(feedback.contact || 'לא נמסרו')}</p>
+      <p><strong>זמן:</strong> ${escapeHtml(feedback.createdAt)}</p>
+      <hr />
+      <p style="white-space:pre-wrap">${escapeHtml(feedback.message)}</p>
+    </div>
+  `;
+}
+
+function escapeHtml(value) {
+  return String(value)
+    .replaceAll('&', '&amp;')
+    .replaceAll('<', '&lt;')
+    .replaceAll('>', '&gt;')
+    .replaceAll('"', '&quot;')
+    .replaceAll("'", '&#39;');
 }
