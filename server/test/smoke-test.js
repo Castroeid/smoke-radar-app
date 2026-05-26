@@ -37,6 +37,17 @@ try {
   assert.equal(recipe.sideDishes.length, 2);
   assert.equal(recipe.sauces.length, 2);
 
+  const kebabResponse = await fetch(`${baseUrl}/recipes/generate`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ cut: 'קבב טלה', method: 'מנגל פחמים', effort: 'מהיר', seasoningStyle: 'ישראלי' }),
+  });
+  const kebab = await kebabResponse.json();
+  assert.equal(kebabResponse.status, 200);
+  assert.ok(kebab.ingredients.some((item) => item.includes('שומן טלה')));
+  assert.ok(kebab.steps.some((step) => step.includes('לישה')));
+  assert.ok(!kebab.steps.some((step) => step.includes('פורסים נגד')));
+
   const expertResponse = await fetch(`${baseUrl}/expert/ask`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },

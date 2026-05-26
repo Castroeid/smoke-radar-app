@@ -46,8 +46,9 @@ export async function generateMockRecipe(req: RecipeRequest): Promise<RecipeResu
   const namedCut = withArticle(cut);
   const isSmoker = req.method.includes('מעשנה');
   const isPot = req.method.includes('קדירה');
-  const isMangal = req.method.includes('מנגל');
+  const isMangal = req.method.includes('מנגל') || req.method.includes('גריל פחמים');
   const isQuick = req.effort === 'מהיר';
+  const isKebabLamb = cut.includes('קבב טלה');
   const kosherNote = req.kosherPreference === 'כשר' ? 'המתכון נשאר כשר וללא שילוב חלב ובשר.' : 'בגרסה לא כשרה אפשר להשתמש ברכיב עשיר רק אם הוא באמת מתאים לשיטה.';
   const style = req.seasoningStyle || 'קלאסי';
   const seed = Math.abs([...`${req.cut}-${req.method}-${style}`].reduce((total, char) => total + char.charCodeAt(0), 0));
@@ -113,7 +114,7 @@ export async function generateMockRecipe(req: RecipeRequest): Promise<RecipeResu
       },
       {
         title: 'רוטב פלפלים קלויים',
-        description: 'רוטב מתקתק-חרוך שמתאים לגריל פחמים ומנגל ישראלי.',
+        description: 'רוטב מתקתק-חרוך שמתאים למנגל פחמים.',
         ingredients: ['2 פלפלים קלויים', 'שן שום', '2 כפות שמן זית', 'כפית חומץ', 'מלח גס'],
         steps: ['קולפים פלפלים קלויים.', 'טוחנים עם שום, שמן וחומץ.', 'מתבלים ומגישים לצד פרוסות הבשר.'],
       },
@@ -136,13 +137,16 @@ export async function generateMockRecipe(req: RecipeRequest): Promise<RecipeResu
   const selectedSides = pickSideDishes(cut, req.method, style) ?? sideSets[seed % sideSets.length];
   const selectedSauces = pickSauces(cut, req.method, req.kosherPreference) ?? sauceSets[(seed + req.method.length) % sauceSets.length];
   const recipeSteps = buildCutAwareSteps(cut, req.method, style, kosherNote);
+  const prepTime = isKebabLamb ? '45-75 דקות' : isQuick ? '45-60 דקות' : req.effort === 'מאוזן' ? '2-3 שעות' : '5-7 שעות';
+  const difficulty = isKebabLamb ? 'בינוני' : isQuick ? 'קל' : req.effort === 'מאוזן' ? 'בינוני' : 'מתקדם';
+  const primaryIngredient = isKebabLamb ? 'בשר טלה טחון גס - 720 גרם' : `${cut} - ${portionForCut(cut)}`;
 
   return {
     title: `${cut} ב${req.method}`,
-    prepTime: isQuick ? '45-60 דקות' : req.effort === 'מאוזן' ? '2-3 שעות' : '5-7 שעות',
-    difficulty: isQuick ? 'קל' : req.effort === 'מאוזן' ? 'בינוני' : 'מתקדם',
+    prepTime,
+    difficulty,
     ingredients: [
-      `${cut} - ${portionForCut(cut)}`,
+      primaryIngredient,
       ...buildSeasoningIngredients(style, cut),
       ...buildMethodIngredients(cut, req.method, req.kosherPreference),
     ],
@@ -164,16 +168,14 @@ export async function generateMockRecipe(req: RecipeRequest): Promise<RecipeResu
           ]
         : isMangal
           ? [
-              'מנגל ישראלי עובד בדרך כלל על גריל פחמים פתוח: רשת מעל גחלים לבנות, אזור חם לצריבה ואזור רגוע יותר לסיום.',
+              'מנגל פחמים עובד על רשת מעל גחלים לוחשות: אזור חם לצריבה ואזור רגוע יותר לסיום בלי לשרוף.',
               'מחכים שהגחלים ילבינו ואין להבות גבוהות. יוצרים אזור חם לצריבה ואזור רגוע יותר להמשך.',
               `מניחים את ${namedCut} על הרשת, צורבים היטב, והופכים רק כשמשתחרר בקלות מהרשת.`,
               'נתחים דקים הופכים פעם אחת. נתחים עבים מסיימים בצד הפחות חם עד שהמרכז מוכן.',
               'מניחים 5-10 דקות לפני פריסה, במיוחד אם זה נתח עבה.',
             ]
           : [
-          req.method.includes('גריל פחמים')
-            ? 'גריל פחמים הוא מנגל עם גחלים לוחשות ולא להבות: צד אחד עם הרבה גחלים לצריבה, וצד שני דליל יותר לסיום עדין.'
-            : `שיטת ${req.method} דורשת חום יציב ושליטה בקצב. מכינים אזור חם לצריבה ואזור עקיף להמשך בישול.`,
+          `שיטת ${req.method} דורשת חום יציב ושליטה בקצב. מכינים אזור חם לצריבה ואזור עקיף להמשך בישול.`,
           `צורבים את ${namedCut} קצר מכל צד בשביל צבע וטעם, ואז מעבירים לחום עקיף כדי שהפנים יתבשל בלי להתייבש.`,
           `הופכים רק פעם או פעמיים, לפי עובי ${namedCut}, ולא לוחצים עליו בזמן הבישול.`,
           'בסיום נותנים מנוחה של 10-20 דקות לפני פריסה כדי לשמור על עסיסיות.',
@@ -187,6 +189,19 @@ export async function generateMockRecipe(req: RecipeRequest): Promise<RecipeResu
 function buildCutAwareSteps(cut: string, method: string, style: string, kosherNote: string) {
   const namedCut = withArticle(cut);
   const seasoningReference = `רכיבי התיבול המפורטים ברשימת המצרכים (${style})`;
+
+  if (cut.includes('קבב טלה')) {
+    return [
+      'מערבבים בשר טלה טחון גס עם שומן טלה קצוץ ביחס של בערך 80/20. המטרה היא תערובת עסיסית שנקשרת, לא קציצה יבשה.',
+      `מוסיפים את ${seasoningReference} ולשים 60-90 שניות בלבד, רק עד שהתערובת מתחילה להיות דביקה ואחידה. לישה ארוכה מדי תהפוך את הקבב לדחוס.`,
+      'מכסים ומקררים 30 דקות כדי שהשומן יתייצב והקבב יחזיק על השיפוד או על הרשת.',
+      'יוצרים קציצות שטוחות או משחילים על שיפודים רחבים בידיים מעט משומנות. לא דוחסים יותר מדי.',
+      'מכינים מנגל פחמים עם גחלים לוחשות, רשת חמה ואזור רגוע בצד. צולים 2-3 דקות מכל צד עד חריכה עדינה ושחרור קל מהרשת.',
+      'מסובבים בעדינות רק כשצריך, ומוציאים כשהקבב שחום מבחוץ ועדיין עסיסי בפנים. לא פורסים ולא נותנים מנוחה ארוכה.',
+      'מגישים מיד בפיתה או בצלחת עם טחינה, בצל-סומאק, ירוקים ולימון.',
+      kosherNote,
+    ];
+  }
 
   if (method.includes('קדירה')) {
     return [
@@ -257,6 +272,7 @@ function buildCutAwareSteps(cut: string, method: string, style: string, kosherNo
 }
 
 function portionForCut(cut: string) {
+  if (cut.includes('קבב טלה')) return '900 גרם';
   if (cut.includes('כנפיים')) return '1.2 ק״ג';
   if (cut.includes('פרגית')) return '1 ק״ג';
   if (cut.includes('חזה עוף')) return '800 גרם';
@@ -268,6 +284,18 @@ function portionForCut(cut: string) {
 }
 
 function buildSeasoningIngredients(style: string, cut: string) {
+  if (cut.includes('קבב טלה')) {
+    if (style.includes('חריף')) {
+      return ['שומן טלה או כבש קצוץ - 180 גרם', 'בצל מגורד וסחוט - 1 קטן', 'פטרוזיליה קצוצה - חצי כוס', 'אריסה או צ׳ילי גרוס - כפית', 'בהרט - כפית', 'כמון - חצי כפית', 'מלח דק - 14 גרם', 'פלפל שחור - כפית'];
+    }
+
+    if (style.includes('עשבי') || style.includes('ישראלי')) {
+      return ['שומן טלה או כבש קצוץ - 180 גרם', 'בצל מגורד וסחוט - 1 קטן', 'פטרוזיליה קצוצה - חצי כוס', 'כוסברה קצוצה - רבע כוס', 'בהרט - כפית', 'כמון - חצי כפית', 'מלח דק - 14 גרם', 'פלפל שחור - כפית'];
+    }
+
+    return ['שומן טלה או כבש קצוץ - 180 גרם', 'בצל מגורד וסחוט - 1 קטן', 'פטרוזיליה קצוצה - חצי כוס', 'בהרט - כפית', 'כמון - חצי כפית', 'מלח דק - 14 גרם', 'פלפל שחור - כפית'];
+  }
+
   if (style.includes('ישראלי')) {
     return ['שמן זית - 3 כפות', 'שום כתוש - 3 שיניים', 'מיץ לימון - 2 כפות', 'פפריקה מתוקה - כפית', 'כמון או בהרט - חצי כפית', 'מלח גס - לפי משקל הבשר', 'פלפל שחור - כפית'];
   }
@@ -297,6 +325,10 @@ function buildSeasoningIngredients(style: string, cut: string) {
 }
 
 function buildMethodIngredients(cut: string, method: string, kosherPreference: string) {
+  if (cut.includes('קבב טלה')) {
+    return ['שמן לשימון הידיים והרשת - כף אחת', 'פיתות או שיפודים רחבים להגשה - לפי הצורך', 'לימון ובצל סומאק להגשה - לפי הטעם'];
+  }
+
   if (method.includes('קדירה')) {
     return kosherPreference === 'לא כשר'
       ? ['בצל - 2 יחידות', 'גזר - 2 יחידות', 'ציר בקר - 2 כוסות', 'יין אדום יבש - כוס אחת', 'חמאה - 25 גרם לסיום הרוטב']
@@ -315,6 +347,13 @@ function buildMethodIngredients(cut: string, method: string, kosherPreference: s
 }
 
 function pickSideDishes(cut: string, method: string, style: string) {
+  if (cut.includes('קבב טלה')) {
+    return [
+      { title: 'בצל סומאק ופטרוזיליה', description: 'חמיצות וחריפות עדינה שמרימות קבב טלה שומני.', steps: ['פורסים בצל סגול דק.', 'מערבבים עם סומאק, פטרוזיליה, לימון וקורט מלח.', 'נותנים 5 דקות מנוחה ומגישים מעל הקבב.'] },
+      { title: 'פיתה חרוכה עם שמן זית', description: 'בסיס ישראלי שסופג את המיצים והטחינה.', steps: ['מברישים פיתות במעט שמן זית.', 'צורבים על המנגל 20-30 שניות מכל צד.', 'חותכים ומגישים חם עם הקבב.'] },
+    ];
+  }
+
   if (method.includes('קדירה')) {
     return [
       { title: 'פירה תפוחי אדמה שסופג רוטב', description: 'תוספת רכה שמחזיקה יפה את רוטב הקדירה.', steps: ['מבשלים תפוחי אדמה עד רכות.', 'מועכים עם שמן זית או חמאה לפי כשרות.', 'מוסיפים מעט מהרוטב מעל ההגשה.'] },
@@ -347,6 +386,13 @@ function pickSideDishes(cut: string, method: string, style: string) {
 }
 
 function pickSauces(cut: string, method: string, kosherPreference: string) {
+  if (cut.includes('קבב טלה')) {
+    return [
+      { title: 'טחינה לימונית סמיכה', description: 'רוטב קרמי שמאזן שומן טלה בלי להשתלט על הטעם.', ingredients: ['חצי כוס טחינה גולמית', 'שליש כוס מים קרים', 'מיץ מחצי לימון', 'שן שום קטנה כתושה', 'מלח'], steps: ['פותחים טחינה עם מים קרים בהדרגה.', 'מוסיפים לימון, שום ומלח.', 'שומרים סמיך מספיק כדי לשבת על הקבב או בפיתה.'] },
+      { title: 'סחוג עגבניות מהיר', description: 'חריפות רעננה שמתאימה לקבב טלה על פחמים.', ingredients: ['עגבנייה מגורדת', 'פלפל ירוק חריף קצוץ', 'כף כוסברה קצוצה', 'כף שמן זית', 'מלח ולימון'], steps: ['מערבבים עגבנייה, חריף וכוסברה.', 'מתבלים בשמן, לימון ומלח.', 'מגישים קר ליד הקבב.'] },
+    ];
+  }
+
   if (method.includes('קדירה')) {
     return [
       { title: 'רוטב קדירה מצומצם', description: 'הרוטב של הבישול עצמו, מרוכז ומבריק.', ingredients: ['כוס מנוזלי הבישול', 'כפית חרדל', 'פלפל שחור', kosherPreference === 'לא כשר' ? 'קוביית חמאה קטנה' : 'כף שמן זית'], steps: ['מסננים כוס מהרוטב.', 'מצמצמים 5-8 דקות.', 'מאזנים מלח ומגישים מעל.'] },

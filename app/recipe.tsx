@@ -13,18 +13,16 @@ import { centerBlockText, centerText, rtlRow, smokeColors } from '@/constants/sm
 import { normalizeCutName } from '@/services/cutUtils';
 import { generateRecipe } from '@/services/smokeRadarService';
 
-const methods = ['מעשנה', 'מנגל ישראלי', 'גריל פחמים', 'סיר קדירה', 'תנור ביתי', 'פלנצ׳ה', 'בישול ארוך בתנור'];
+const methods = ['מעשנה', 'מנגל פחמים', 'סיר קדירה', 'תנור', 'פלנצ׳ה'];
 const efforts = ['מהיר', 'מאוזן', 'מושקע'];
 const kosherOptions = ['כשר', 'לא כשר'];
 const seasoningStyles = ['קלאסי', 'ישראלי', 'מתוק מעושן', 'מתקתק', 'מעושן עמוק', 'חריף', 'עשבי תיבול', 'אסייתי'];
 const methodDescriptions: Record<string, string> = {
   מעשנה: 'חום עקיף נמוך עם עשן עדין. מתאים לנתחים שצריכים זמן, צבע ורכות.',
-  'מנגל ישראלי': 'רשת פתוחה מעל גחלים. עבודה מהירה יחסית עם אזור חם ואזור רגוע, כמו מנגל ביתי.',
-  'גריל פחמים': 'שליטה מדויקת יותר עם גחלים, מכסה ואזורים. טוב גם לנתחים עבים שצריכים סיום עקיף.',
+  'מנגל פחמים': 'רשת מעל גחלים לוחשות, עם אזור חם לצריבה ואזור רגוע לסיום. מתאים לקבב, שיפודים, סטייקים ונתחים שצריכים שליטה בחום.',
   'סיר קדירה': 'צריבה ואז בישול איטי בנוזלים עד רכות. מתאים לאסאדו, אונטריב ונתחים סיביים.',
-  'תנור ביתי': 'בישול יציב ונוח בבית, עם צריבה לפני או אחרי לפי הנתח.',
+  'תנור': 'חום יציב ונוח בבית. המתכון עצמו יקבע אם זו אפייה קצרה, צלייה חזקה או בישול ארוך לפי הנתח ורמת ההשקעה.',
   'פלנצ׳ה': 'משטח חם לצריבה מהירה. מתאים לנתחים דקים, פרגית וסטייקים קצרים.',
-  'בישול ארוך בתנור': 'חום נמוך לאורך זמן, לריכוך נתח גדול בלי מעשנה.',
 };
 const seasoningDescriptions: Record<string, string> = {
   קלאסי: 'מלח, פלפל, שום ומעט שמן. נותן לנתח לדבר.',
@@ -107,6 +105,7 @@ export default function RecipeScreen() {
           onBack={() => setStep(1)}
           onNext={() => setStep(3)}
           descriptions={methodDescriptions}
+          presentation="dropdown"
         />
       ) : null}
 
@@ -159,23 +158,71 @@ type ChoiceStepProps = {
   nextTitle?: string;
   error?: string;
   descriptions?: Record<string, string>;
+  presentation?: 'buttons' | 'dropdown';
 };
 
-function ChoiceStep({ title, options, value, onSelect, onBack, onNext, nextTitle = 'המשך', error, descriptions }: ChoiceStepProps) {
+function ChoiceStep({
+  title,
+  options,
+  value,
+  onSelect,
+  onBack,
+  onNext,
+  nextTitle = 'המשך',
+  error,
+  descriptions,
+  presentation = 'buttons',
+}: ChoiceStepProps) {
+  const [dropdownOpen, setDropdownOpen] = useState(false);
+
   return (
     <AppCard>
       <Text style={styles.stepTitle}>{title}</Text>
-      <View style={styles.options}>
-        {options.map((option) => {
-          const selected = option === value;
+      {presentation === 'dropdown' ? (
+        <View style={styles.dropdownWrap}>
+          <Pressable style={styles.dropdownHeader} onPress={() => setDropdownOpen((current) => !current)}>
+            <Text style={styles.dropdownArrow}>{dropdownOpen ? '▲' : '▼'}</Text>
+            <View style={styles.dropdownTextBlock}>
+              <Text style={styles.dropdownLabel}>בחרו שיטה</Text>
+              <Text style={styles.dropdownValue}>{value}</Text>
+            </View>
+          </Pressable>
 
-          return (
-            <Pressable key={option} style={[styles.option, selected && styles.optionSelected]} onPress={() => onSelect(option)}>
-              <Text style={[styles.optionText, selected && styles.optionTextSelected]}>{option}</Text>
-            </Pressable>
-          );
-        })}
-      </View>
+          {dropdownOpen ? (
+            <View style={styles.dropdownList}>
+              {options.map((option) => {
+                const selected = option === value;
+
+                return (
+                  <Pressable
+                    key={option}
+                    style={[styles.dropdownOption, selected && styles.dropdownOptionSelected]}
+                    onPress={() => {
+                      onSelect(option);
+                      setDropdownOpen(false);
+                    }}
+                  >
+                    <Text style={[styles.dropdownOptionText, selected && styles.dropdownOptionTextSelected]}>{option}</Text>
+                    {descriptions?.[option] ? <Text style={styles.dropdownOptionDescription}>{descriptions[option]}</Text> : null}
+                  </Pressable>
+                );
+              })}
+            </View>
+          ) : null}
+        </View>
+      ) : (
+        <View style={styles.options}>
+          {options.map((option) => {
+            const selected = option === value;
+
+            return (
+              <Pressable key={option} style={[styles.option, selected && styles.optionSelected]} onPress={() => onSelect(option)}>
+                <Text style={[styles.optionText, selected && styles.optionTextSelected]}>{option}</Text>
+              </Pressable>
+            );
+          })}
+        </View>
+      )}
       {descriptions?.[value] ? (
         <View style={styles.descriptionBox}>
           <Text style={styles.descriptionTitle}>מה זה אומר?</Text>
@@ -261,6 +308,77 @@ const styles = StyleSheet.create({
   },
   optionTextSelected: {
     color: smokeColors.text,
+  },
+  dropdownWrap: {
+    gap: 10,
+  },
+  dropdownHeader: {
+    ...rtlRow,
+    minHeight: 64,
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    gap: 12,
+    borderRadius: 16,
+    borderWidth: 1,
+    borderColor: smokeColors.orange,
+    backgroundColor: '#2A150D',
+    paddingHorizontal: 14,
+    paddingVertical: 10,
+  },
+  dropdownArrow: {
+    color: smokeColors.orange,
+    fontSize: 16,
+    fontWeight: '900',
+  },
+  dropdownTextBlock: {
+    flex: 1,
+    alignItems: 'center',
+    gap: 3,
+  },
+  dropdownLabel: {
+    color: smokeColors.gold,
+    fontSize: 12,
+    fontWeight: '900',
+    ...centerText,
+  },
+  dropdownValue: {
+    color: smokeColors.text,
+    fontSize: 22,
+    fontWeight: '900',
+    ...centerText,
+  },
+  dropdownList: {
+    gap: 9,
+  },
+  dropdownOption: {
+    gap: 5,
+    minHeight: 64,
+    justifyContent: 'center',
+    borderRadius: 16,
+    borderWidth: 1,
+    borderColor: smokeColors.border,
+    backgroundColor: smokeColors.surfaceAlt,
+    paddingHorizontal: 14,
+    paddingVertical: 11,
+  },
+  dropdownOptionSelected: {
+    borderColor: smokeColors.orange,
+    backgroundColor: '#2A150D',
+  },
+  dropdownOptionText: {
+    color: smokeColors.text,
+    fontSize: 18,
+    fontWeight: '900',
+    ...centerText,
+  },
+  dropdownOptionTextSelected: {
+    color: smokeColors.orange,
+  },
+  dropdownOptionDescription: {
+    color: smokeColors.muted,
+    fontSize: 13,
+    lineHeight: 19,
+    ...centerBlockText,
   },
   descriptionBox: {
     gap: 5,
